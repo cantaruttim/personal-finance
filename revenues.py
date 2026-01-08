@@ -1,6 +1,6 @@
 import pandas as pd
+from config.config import FILE_PATH
 
-FILE_PATH = "./data/finance_report.xlsx"
 SHEET_NAME = "revenues"
 
 revenues = pd.read_excel(

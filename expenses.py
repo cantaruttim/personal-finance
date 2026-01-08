@@ -1,11 +1,11 @@
 import pandas as pd
 from config.config import FILE_PATH
 
-SHEET_NAME = "installments"
+SHEET_NAME = "card_expenses"
 
-installment = pd.read_excel(
+revenues = pd.read_excel(
     FILE_PATH,
     sheet_name=SHEET_NAME
 )
 
-print(installment)
+print(revenues)
