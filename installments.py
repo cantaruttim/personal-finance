@@ -13,8 +13,7 @@ installment = pd.read_excel(
 def total_expend_on_month(df):
     df['total_expend_on_month'] = (
         df
-            .groupby('yearmonth', as_index=False)
-            ['value']
+            .groupby('yearmonth', as_index=False)['value']
             .transform('sum')
         )
     return df
