@@ -1,9 +1,14 @@
 import pandas as pd
 from config.config import FILE_PATH
-from utils import total_expend_on_month, cards_onwers, select_columns
+from utils import (
+    parse_ptbr_money,
+    total_expend_on_month, 
+    cards_onwers, 
+    select_columns,
+    normalize_yearmonth
+)
 
 SHEET_NAME = "installments"
-
 card_expenses = cards_onwers(FILE_PATH, "card_expenses")
 
 installment = pd.read_excel(
@@ -11,13 +16,9 @@ installment = pd.read_excel(
     sheet_name=SHEET_NAME
 )
 
-installment = total_expend_on_month(
-    installment, 
-    'yearmonth', 
-    'value',
-    'sum'
-) 
-
+installment['value'] = parse_ptbr_money(installment['value'])
+installment = normalize_yearmonth(installment)
+installment = total_expend_on_month(installment, 'yearmonth', 'value')
 
 installment = installment.merge(
     card_expenses, 
