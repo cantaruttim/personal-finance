@@ -3,3 +3,4 @@
 data/
 .vscode/
 pf/
+__pycache__
