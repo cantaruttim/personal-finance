@@ -1,6 +1,10 @@
 import pandas as pd
 
 def normalize_yearmonth(df):
+    '''
+        Force yearmonth treatment column in order to keep data with 6 digits
+    '''
+
     df = df.copy()
     df['yearmonth'] = df['yearmonth'].astype(str).str.zfill(6)
     return df
@@ -34,7 +38,10 @@ def total_expend_on_month(
         categorical,
         numerical
     ):
-
+    '''
+        Total amount of expenses
+        Group by data based on YEARMONTH column
+    '''
     df = df.copy()
     df['total_expend_on_month'] = (
         df
@@ -43,7 +50,12 @@ def total_expend_on_month(
     )
     return df
 
-def cards_onwers(FILE_PATH, SHEET_NAME):
+def cards_owners(FILE_PATH, SHEET_NAME):
+    '''
+    Function that is responsible to find the cards owners
+    on installments based on the expensive data and cards available
+
+    '''
     df = pd.read_excel( FILE_PATH, SHEET_NAME)
     return (
         df[['card', 'owner']]
