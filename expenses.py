@@ -22,4 +22,6 @@ expenses['value'] = parse_ptbr_money(expenses['value'])
 expenses = normalize_yearmonth(expenses)
 expenses = total_expend_on_month(expenses, 'yearmonth', 'value')
 
+expenses['total_expend_on_month'] = expenses['total_expend_on_month'] - DANI_VALUE
+
 print(expenses)

@@ -1,6 +1,7 @@
 # imports
 import pandas as pd
 from config.config import FILE_PATH
+from data.data import DANI_VALUE
 from utils import (
     parse_ptbr_money,
     total_expend_on_month, 
@@ -37,4 +38,5 @@ installment = select_columns(
     ['card','card_flag','yearmonth','value','actual_installment','final_installment','total_expend_on_month','owner_from_cards']
 )
 
+installment['total_expend_on_month'] = installment['total_expend_on_month'] - DANI_VALUE
 print(installment)
