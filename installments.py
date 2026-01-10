@@ -20,23 +20,27 @@ installment = pd.read_excel(
     sheet_name=SHEET_NAME
 )
 
-# initial treatments
-installment['value'] = parse_ptbr_money(installment['value'])
-installment = normalize_yearmonth(installment)
-installment = total_expend_on_month(installment, 'yearmonth', 'value')
+def build_installments_report():
+    # initial treatments
+    installment['value'] = parse_ptbr_money(installment['value'])
+    installment = normalize_yearmonth(installment)
+    installment = total_expend_on_month(installment, 'yearmonth', 'value')
 
-# merging information
-installment = installment.merge(
-    card_expenses, 
-    on='card', 
-    how='left',
-    suffixes=('', '_from_cards')
-)
+    # merging information
+    installment = installment.merge(
+        card_expenses, 
+        on='card', 
+        how='left',
+        suffixes=('', '_from_cards')
+    )
 
-installment = select_columns(
-    installment, 
-    ['card','card_flag','yearmonth','value','actual_installment','final_installment','total_expend_on_month','owner_from_cards']
-)
+    installment = select_columns(
+        installment, 
+        ['card','card_flag','yearmonth','value','actual_installment','final_installment','total_expend_on_month','owner_from_cards']
+    )
 
-installment['total_expend_on_month'] = installment['total_expend_on_month'] - DANI_VALUE
+    installment['total_expend_on_month'] = installment['total_expend_on_month'] - DANI_VALUE
+    return installment
+
+installment = build_installments_report()
 print(installment)
