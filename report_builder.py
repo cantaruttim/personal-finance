@@ -6,6 +6,7 @@ from data.data import salary
 
 exp = build_expenses_report(read_expenses())
 inst = build_installments_report(read_installment())
+salary = total_couple_salary(salary)
 
 def show_exp_and_inst():
     print("\n Expenses are descrive bellow \n")
@@ -14,5 +15,4 @@ def show_exp_and_inst():
     print("\n Installment are descrive bellow \n")
     print(inst)
 
-salary = total_couple_salary(salary)
 print(salary)
