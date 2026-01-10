@@ -23,7 +23,7 @@ exp = build_expenses_report(read_expenses())
 #     print(inst)
 
 salary = total_couple_salary_monthly(SALARY)
-exp = consolidating_salary(exp, SALARY)
+exp = consolidating_salary(exp, salary)
 exp = balance(exp)
 
 ## MONEY DESIRED TO SAVE
