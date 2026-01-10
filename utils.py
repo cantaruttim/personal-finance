@@ -5,6 +5,9 @@ from data.data import (
     SALARY
 )
 
+# ================================================
+# ==== USED ON DATA TREATMENTS OR GENERAL USE ====
+# ================================================
 def normalize_yearmonth(df):
     '''
         Force yearmonth treatment column in order to keep data with 6 digits
@@ -38,23 +41,6 @@ def parse_ptbr_money(series: pd.Series, force_ptbr=False) -> pd.Series:
         .astype(float)
     )
 
-def total_expend_on_month(
-        df: pd.DataFrame,
-        categorical,
-        numerical
-    ):
-    '''
-        Total amount of expenses
-        Group by data based on YEARMONTH column
-    '''
-    df = df.copy()
-    df['total_expend_on_month'] = (
-        df
-        .groupby(categorical)[numerical]
-        .transform('sum')
-    )
-    return df
-
 def tenth_(MATH_SALARY, GABI_SALARY, TENTH):
     '''return the tenth of the month'''
     tenth = (MATH_SALARY + GABI_SALARY) * TENTH
@@ -76,6 +62,27 @@ def cards_owners(FILE_PATH, SHEET_NAME):
 
 def select_columns(df, columns):
     return df[columns]
+
+
+# ================================
+# ==== USED ON REPORT_BUILDER ====
+# ================================
+def total_expend_on_month(
+        df: pd.DataFrame,
+        categorical,
+        numerical
+    ):
+    '''
+        Total amount of expenses
+        Group by data based on YEARMONTH column
+    '''
+    df = df.copy()
+    df['total_expend_on_month'] = (
+        df
+        .groupby(categorical)[numerical]
+        .transform('sum')
+    )
+    return df
 
 def total_couple_salary_monthly(SALARY):
     salary = pd.DataFrame(SALARY)
