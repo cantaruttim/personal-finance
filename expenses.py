@@ -12,13 +12,17 @@ from utils import (
 SHEET_NAME = "card_expenses"
 
 # sheet used in
-expenses = pd.read_excel(
-    FILE_PATH,
-    sheet_name=SHEET_NAME
-)
+def read_expenses():
+    expenses = pd.read_excel(
+        FILE_PATH,
+        sheet_name=SHEET_NAME
+    )
+    return expenses
+
+expenses = read_expenses()
 
 # initial treatments
-def build_expenses_report():
+def build_expenses_report(expenses):
     expenses['value'] = parse_ptbr_money(expenses['value'])
     expenses = normalize_yearmonth(expenses)
     expenses = total_expend_on_month(expenses, 'yearmonth', 'value')
@@ -26,6 +30,3 @@ def build_expenses_report():
     expenses['total_expend_on_month'] = expenses['total_expend_on_month'] - DANI_VALUE
 
     return expenses
-
-expenses = build_expenses_report()
-print(expenses)

@@ -15,12 +15,16 @@ SHEET_NAME = "installments"
 card_expenses = cards_owners(FILE_PATH, "card_expenses")
 
 # sheet used in 
-installment = pd.read_excel(
-    FILE_PATH,
-    sheet_name=SHEET_NAME
-)
+def read_installment():
+    installment = pd.read_excel(
+        FILE_PATH,
+        sheet_name=SHEET_NAME
+    )
+    return installment
 
-def build_installments_report():
+installment = read_installment()
+
+def build_installments_report(installment):
     # initial treatments
     installment['value'] = parse_ptbr_money(installment['value'])
     installment = normalize_yearmonth(installment)
@@ -41,6 +45,3 @@ def build_installments_report():
 
     installment['total_expend_on_month'] = installment['total_expend_on_month'] - DANI_VALUE
     return installment
-
-installment = build_installments_report()
-print(installment)
