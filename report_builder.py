@@ -26,4 +26,13 @@ def salary_on_month(exp):
     return exp
 
 exp = salary_on_month(exp)
+
+def balance(exp):
+    exp['balance'] = (
+        exp['total_expend_on_month'] - 
+        exp['total_on_month']
+    )
+    return exp
+
+exp = balance(exp)
 print(exp)
