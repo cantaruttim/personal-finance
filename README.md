@@ -23,6 +23,7 @@ Therefore, this code have the <strong>main responsability</strong> to:
 4. Report Builder, find at `report_builder.py`
 
 
+```mermaid
 flowchart TD
     %% Data Sources
     A[expenses.py] -->|Reads raw data| B[Expenses DataFrame]
@@ -41,3 +42,4 @@ flowchart TD
 
     %% Final Output
     F --> G[Financial Report\n(DataFrame / CSV / PDF / Dashboard)]
+```
