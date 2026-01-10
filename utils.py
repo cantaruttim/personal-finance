@@ -2,7 +2,7 @@ import pandas as pd
 from data.data import (
     TENTH,
     MONEY_DESIRED_TO_SAVE,
-    salary
+    SALARY
 )
 
 def normalize_yearmonth(df):
@@ -77,8 +77,8 @@ def cards_owners(FILE_PATH, SHEET_NAME):
 def select_columns(df, columns):
     return df[columns]
 
-def total_couple_salary_monthly(salary):
-    salary = pd.DataFrame(salary)
+def total_couple_salary_monthly(SALARY):
+    salary = pd.DataFrame(SALARY)
     salary = (
         salary
         .assign(total_couple_salary_on_month=(
