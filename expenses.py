@@ -18,10 +18,14 @@ expenses = pd.read_excel(
 )
 
 # initial treatments
-expenses['value'] = parse_ptbr_money(expenses['value'])
-expenses = normalize_yearmonth(expenses)
-expenses = total_expend_on_month(expenses, 'yearmonth', 'value')
+def build_expenses_report():
+    expenses['value'] = parse_ptbr_money(expenses['value'])
+    expenses = normalize_yearmonth(expenses)
+    expenses = total_expend_on_month(expenses, 'yearmonth', 'value')
 
-expenses['total_expend_on_month'] = expenses['total_expend_on_month'] - DANI_VALUE
+    expenses['total_expend_on_month'] = expenses['total_expend_on_month'] - DANI_VALUE
 
+    return expenses
+
+expenses = build_expenses_report()
 print(expenses)
