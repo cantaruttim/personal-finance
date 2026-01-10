@@ -92,11 +92,11 @@ def total_couple_salary(salary):
         salary["MATHEUS"] + 
         salary["GABRIELLA"]
     )
-    salary = salary.sort_values(by='MONTH', ascending=True)
+    salary = salary.sort_values(by='yearmonth', ascending=True)
 
     salary = select_columns(
         salary, 
-        ['MONTH', 'total_on_month']
+        ['yearmonth', 'total_on_month']
     )
 
     return salary
