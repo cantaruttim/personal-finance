@@ -19,8 +19,6 @@ def read_expenses():
     )
     return expenses
 
-expenses = read_expenses()
-
 # initial treatments
 def build_expenses_report(expenses):
     expenses['value'] = parse_ptbr_money(expenses['value'])

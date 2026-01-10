@@ -32,8 +32,6 @@ def read_installment():
     )
     return installment
 
-installment = read_installment()
-
 def build_installments_report(installment):
     # initial treatments
     installment['value'] = parse_ptbr_money(installment['value'])
