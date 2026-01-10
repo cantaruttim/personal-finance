@@ -30,7 +30,6 @@ exp = balance(exp)
 exp['should_save'] = (
     exp['total_couple_salary_on_month'] * (MONEY_DESIRED_TO_SAVE / 100)
 )
-
 print(exp)
 
 # exp = balance(exp)

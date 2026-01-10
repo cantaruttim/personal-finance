@@ -38,5 +38,8 @@ flowchart TD
     E --> F
 
     F --> G[Financial Report]
-
 ```
+
+## Future developings
+1. Financial model to predict how will be expended on next month
+2. Recommendations to lower expensed to save money
