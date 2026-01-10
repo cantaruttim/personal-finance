@@ -5,4 +5,4 @@ from config.config import FILE_PATH_OUTPUT
 exp = read_expenses()
 inst = read_installment()
 
-print(exp)
+print(inst)

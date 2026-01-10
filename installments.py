@@ -1,5 +1,6 @@
 # imports
 import pandas as pd
+import numpy as np
 from config.config import FILE_PATH
 from data.data import DANI_VALUE
 from utils import (
@@ -16,9 +17,18 @@ card_expenses = cards_owners(FILE_PATH, "card_expenses")
 
 # sheet used in 
 def read_installment():
+
     installment = pd.read_excel(
         FILE_PATH,
         sheet_name=SHEET_NAME
+    )
+
+    installment['obs'] = (
+        installment['obs']
+            .astype(str)
+            .str.strip()
+            .replace(['NaN', 'nan', 'None', ''], np.nan)
+            .fillna('')
     )
     return installment
 
@@ -44,4 +54,5 @@ def build_installments_report(installment):
     )
 
     installment['total_expend_on_month'] = installment['total_expend_on_month'] - DANI_VALUE
+    
     return installment
