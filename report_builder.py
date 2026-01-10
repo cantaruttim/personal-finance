@@ -14,7 +14,6 @@ def show_exp_and_inst():
 
     print("\n Installment are descrive bellow \n")
     print(inst)
-
 def salary_on_month(exp):
     # merging information
     exp = exp.merge(
