@@ -25,21 +25,18 @@ Therefore, this code have the <strong>main responsability</strong> to:
 
 ```mermaid
 flowchart TD
-    %% Data Sources
-    A[expenses.py] -->|Reads raw data| B[Expenses DataFrame]
-    C[installments.py] -->|Reads raw data| D[Installments DataFrame]
+    A[expenses.py] --> B[Expenses DataFrame]
+    C[installments.py] --> D[Installments DataFrame]
 
-    %% Utils
     E[utils.py]
-    E -->|Data cleaning| B
-    E -->|Data cleaning| D
+    E --> B
+    E --> D
 
-    %% Report Builder
     B --> F[report_builder.py]
     D --> F
 
-    E -->|Generic functions\ncalculations\nhelpers| F
+    E --> F
 
-    %% Final Output
-    F --> G[Financial Report\n(DataFrame / CSV / PDF / Dashboard)]
+    F --> G[Financial Report]
+
 ```
