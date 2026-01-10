@@ -83,7 +83,7 @@ def cards_owners(FILE_PATH, SHEET_NAME):
 def select_columns(df, columns):
     return df[columns]
 
-def total_salary_couple(salary):
+def total_couple_salary(salary):
     '''
         Returns the total couple`s salary amount
     '''
