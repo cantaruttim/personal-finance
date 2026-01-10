@@ -31,6 +31,11 @@ def balance(exp):
         exp['total_expend_on_month'] - 
         exp['total_on_month']
     )
+    exp["perc_balance"] = round(
+        exp['total_expend_on_month'] /
+        exp['total_on_month'],
+        4
+    )
     return exp
 
 exp = balance(exp)
