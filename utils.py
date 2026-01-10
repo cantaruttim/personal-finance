@@ -83,20 +83,38 @@ def cards_owners(FILE_PATH, SHEET_NAME):
 def select_columns(df, columns):
     return df[columns]
 
-def total_couple_salary(salary):
-    '''
-        Returns the total couple`s salary amount
-    '''
+def total_couple_salary_monthly(salary):
     salary = pd.DataFrame(salary)
-    salary["total_on_month"] = (
-        salary["MATHEUS"] + 
-        salary["GABRIELLA"]
+    salary = (
+        salary
+        .assign(total_salary_on_month=(
+            salary['MATHEUS'] + 
+            salary['GABRIELLA'])
+        )
+        .groupby('yearmonth', as_index=False)['total_salary_on_month']
+        .sum()
     )
-    salary = salary.sort_values(by='yearmonth', ascending=True)
-
-    salary = select_columns(
-        salary, 
-        ['yearmonth', 'total_on_month']
-    )
-
     return salary
+
+def consolidating_salary(exp, salary):
+
+    exp = exp.merge(
+        salary,
+        on='yearmonth',
+        how='left',
+        suffixes=('', '_from_salary')
+    )
+
+    return exp
+
+def balance(exp):
+    exp['balance'] = (
+        exp['total_expend_on_month'] - 
+        exp['total_salary_on_month']
+    )
+    exp["perc_balance"] = round(
+        exp['total_expend_on_month'] /
+        exp['total_salary_on_month'],
+        4
+    )
+    return exp
