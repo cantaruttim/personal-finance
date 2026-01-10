@@ -61,12 +61,6 @@ def tenth_(MATH_SALARY, GABI_SALARY, TENTH):
     tenth = float(tenth)
     return tenth
 
-def money_to_save(MATH_SALARY, GABI_SALARY, MONEY_DESIRED_TO_SAVE):
-    '''return the total money that should be saved'''
-    total = (MATH_SALARY + GABI_SALARY) * MONEY_DESIRED_TO_SAVE
-    total = float(total)
-    return total
-
 def cards_owners(FILE_PATH, SHEET_NAME):
     '''
     Function that is responsible to find the cards owners
