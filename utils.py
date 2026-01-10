@@ -87,11 +87,11 @@ def total_couple_salary_monthly(salary):
     salary = pd.DataFrame(salary)
     salary = (
         salary
-        .assign(total_salary_on_month=(
+        .assign(total_couple_salary_on_month=(
             salary['MATHEUS'] + 
             salary['GABRIELLA'])
         )
-        .groupby('yearmonth', as_index=False)['total_salary_on_month']
+        .groupby('yearmonth', as_index=False)['total_couple_salary_on_month']
         .sum()
     )
     return salary
@@ -110,11 +110,11 @@ def consolidating_salary(exp, salary):
 def balance(exp):
     exp['balance'] = (
         exp['total_expend_on_month'] - 
-        exp['total_salary_on_month']
+        exp['total_couple_salary_on_month']
     )
     exp["perc_balance"] = round(
         exp['total_expend_on_month'] /
-        exp['total_salary_on_month'],
+        exp['total_couple_salary_on_month'],
         4
     )
     return exp
