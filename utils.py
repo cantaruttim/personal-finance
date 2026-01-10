@@ -1,4 +1,8 @@
 import pandas as pd
+from data.data import (
+    TENTH,
+    MONEY_DESIRED_TO_SAVE
+)
 
 def normalize_yearmonth(df):
     '''
