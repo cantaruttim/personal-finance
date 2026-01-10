@@ -1,7 +1,9 @@
 import pandas as pd
 from data.data import (
     TENTH,
-    MONEY_DESIRED_TO_SAVE
+    MONEY_DESIRED_TO_SAVE,
+    MATH_SALARY,
+    GABI_SALARY
 )
 
 def normalize_yearmonth(df):
@@ -53,6 +55,18 @@ def total_expend_on_month(
         .transform('sum')
     )
     return df
+
+def tenth_(MATH_SALARY, GABI_SALARY, TENTH):
+    '''return the tenth of the month'''
+    tenth = (MATH_SALARY + GABI_SALARY) * TENTH
+    tenth = float(tenth)
+    return tenth
+
+def money_to_save(MATH_SALARY, GABI_SALARY, MONEY_DESIRED_TO_SAVE):
+    '''return the total money that should be saved'''
+    total = (MATH_SALARY + GABI_SALARY) * MONEY_DESIRED_TO_SAVE
+    total = float(total)
+    return total
 
 def cards_owners(FILE_PATH, SHEET_NAME):
     '''
