@@ -93,4 +93,10 @@ def total_couple_salary(salary):
         salary["GABRIELLA"]
     )
     salary = salary.sort_values(by='MONTH', ascending=True)
+
+    salary = select_columns(
+        salary, 
+        ['MONTH', 'total_on_month']
+    )
+
     return salary
