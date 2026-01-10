@@ -2,8 +2,7 @@ import pandas as pd
 from data.data import (
     TENTH,
     MONEY_DESIRED_TO_SAVE,
-    MATH_SALARY,
-    GABI_SALARY
+    salary
 )
 
 def normalize_yearmonth(df):
@@ -83,3 +82,15 @@ def cards_owners(FILE_PATH, SHEET_NAME):
 
 def select_columns(df, columns):
     return df[columns]
+
+def total_salary_couple(salary):
+    '''
+        Returns the total couple`s salary amount
+    '''
+    salary = pd.DataFrame(salary)
+    salary["total_on_month"] = (
+        salary["MATHEUS"] + 
+        salary["GABRIELLA"]
+    )
+    salary = salary.sort_values(by='MONTH', ascending=True)
+    return salary
