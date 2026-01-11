@@ -16,6 +16,9 @@ Therefore, this code have the <strong>main responsability</strong> to:
 3. Build code responsability
 4. Fast solving personal financial problems
 
+## Data Source
+An excel file find on `data`folder (not commited and ignored on `.gitignore` file)
+
 ## Models
 1. Expenses, find at `expenses.py`
 2. Installments, find at `installments.py`
