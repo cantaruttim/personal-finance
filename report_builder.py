@@ -1,7 +1,8 @@
 from utils import (
     total_couple_salary_monthly,
     balance,
-    consolidating_salary
+    consolidating_salary,
+    total_expend_on_month
 )
 from expenses import build_expenses_report, read_expenses
 from installments import build_installments_report, read_installment
@@ -25,6 +26,7 @@ exp = build_expenses_report(read_expenses())
 salary = total_couple_salary_monthly(SALARY)
 exp = consolidating_salary(exp, salary)
 exp = balance(exp)
+
 
 ## MONEY DESIRED TO SAVE
 exp['should_save'] = (
