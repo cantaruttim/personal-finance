@@ -14,9 +14,11 @@ from data.data import (
 )
 import pandas as pd
 
+# files
 inst = build_installments_report(read_installment())
 exp = build_expenses_report(read_expenses())
 
+# initial treatments
 salary = total_couple_salary_monthly(SALARY)
 exp = consolidating_salary(exp, salary)
 exp = balance(exp)
