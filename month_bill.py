@@ -13,7 +13,7 @@ def read_fixed_consumption():
     df = pd.read_excel(FILE_PATH, SHEET_NAME)
     return df
 
-def consolidated_expenses(df, total_expend_on_month, select_columns):
+def consolidated_expenses(df):
     df = total_expend_on_month(df, 'yearmonth', 'value')
     df = select_columns(df, ['yearmonth','total_expend_on_month'])
     df['real_expenses'] = df['total_expend_on_month'] - DANI_VALUE
