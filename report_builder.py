@@ -17,13 +17,6 @@ import pandas as pd
 inst = build_installments_report(read_installment())
 exp = build_expenses_report(read_expenses())
 
-# def show_exp_and_inst():
-#     print("\n Expenses are descrive bellow \n")
-#     print(exp)
-
-#     print("\n Installment are descrive bellow \n")
-#     print(inst)
-
 salary = total_couple_salary_monthly(SALARY)
 exp = consolidating_salary(exp, salary)
 exp = balance(exp)
@@ -33,13 +26,12 @@ exp = balance(exp)
 exp['should_save'] = (
     exp['total_couple_salary_on_month'] * (MONEY_DESIRED_TO_SAVE / 100)
 )
-# print(exp)
 
 print("\n")
 print("Consolidated expenses ... \n")
-
 fixed = read_fixed_consumption()
 fixed = normalize_yearmonth(fixed)
 fixed = consolidated_expenses(fixed)
 
 print(fixed)
+print(exp)
