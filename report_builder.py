@@ -2,8 +2,10 @@ from utils import (
     total_couple_salary_monthly,
     balance,
     consolidating_salary,
-    total_expend_on_month
+    total_expend_on_month,
+    select_columns
 )
+from month_bill import read_fixed_consumption, consolidated_expenses
 from expenses import build_expenses_report, read_expenses
 from installments import build_installments_report, read_installment
 from config.config import FILE_PATH_OUTPUT
@@ -33,6 +35,11 @@ exp['should_save'] = (
     exp['total_couple_salary_on_month'] * (MONEY_DESIRED_TO_SAVE / 100)
 )
 print(exp)
+
+print("\n")
+print("Consolidated expenses ... \n")
+
+fixed = read_fixed_consumption()
 
 # exp = balance(exp)
 # print(exp)
