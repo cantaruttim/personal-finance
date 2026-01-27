@@ -3,7 +3,8 @@ from datetime import datetime
 from data.data import (
     TENTH,
     MONEY_DESIRED_TO_SAVE,
-    SALARY
+    SALARY,
+    DANI_VALUE
 )
 
 # ================================================
@@ -41,6 +42,9 @@ def parse_ptbr_money(series: pd.Series, force_ptbr=False) -> pd.Series:
         .str.replace(',', '.', regex=False)
         .astype(float)
     )
+
+def fill_nan_with_zero(df):
+    return df.fillna(0)
 
 def tenth_(MATH_SALARY, GABI_SALARY, TENTH):
     '''return the tenth of the month'''
@@ -122,22 +126,22 @@ def balance(exp):
     return exp
 
 
-def perc_month_variation(value):
-    value['yearmonth'] = value['yearmonth'].astype(str).str.zfill(6)
+def perc_month_variation(df):
+    df['yearmonth'] = df['yearmonth'].astype(str).str.zfill(6)
 
-    value['year'] = value['yearmonth'].str[-4:].astype(int)
-    value['month'] = value['yearmonth'].str[:2].astype(int)
+    df['year'] = df['yearmonth'].str[-4:].astype(int)
+    df['month'] = df['yearmonth'].str[:2].astype(int)
 
-    value = value.sort_values(['year', 'month']).reset_index(drop=True)
+    df = df.sort_values(['year', 'month']).reset_index(drop=True)
 
-    value['next_value'] = value.groupby('year')['value'].shift(-1)
+    df['next_value'] = df.groupby('year')['value'].shift(-1)
 
-    value['variation_percent'] = (
-        (value['next_value'] - value['value']) / value['value']
+    df['variation_percent'] = (
+        (df['next_value'] - (df['value'] - DANI_VALUE)) / (df['value'] - DANI_VALUE)
     ) * 100
 
-    value['variation_percent'] = value['variation_percent'].round(2)
+    df['variation_percent'] = df['variation_percent'].round(2)
 
     current_year = datetime.now().year
-    value = value[value['year'] == current_year].reset_index(drop=True)
-    return value
+    df = df[df['year'] == current_year].reset_index(drop=True)
+    return df

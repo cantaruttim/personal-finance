@@ -5,11 +5,11 @@ from data.data import DANI_VALUE
 from utils import (
     parse_ptbr_money,
     total_expend_on_month, 
-    normalize_yearmonth
+    normalize_yearmonth,
+    perc_month_variation,
+    fill_nan_with_zero,
+    select_columns
 )
-
-# global variables
-SHEET_NAME = "card_expenses"
 
 # sheet used in
 def read_expenses():
@@ -18,6 +18,11 @@ def read_expenses():
         sheet_name=SHEET_NAME
     )
     return expenses
+
+
+# global variables
+SHEET_NAME = "card_expenses"
+df = total_expend_on_month(read_expenses(), "yearmonth", "value")
 
 # initial treatments
 def build_expenses_report(expenses):
@@ -29,10 +34,21 @@ def build_expenses_report(expenses):
 
     return expenses
 
-df = total_expend_on_month(read_expenses(), "yearmonth", "value")
 
-value = normalize_yearmonth(
-    df
-    .groupby('yearmonth', as_index=False)['value']
-    .sum()
-)
+def sum_expenses_dataframe(df):
+    value = normalize_yearmonth(
+        df
+        .groupby('yearmonth', as_index=False)['value']
+        .sum()
+    )
+    return value
+
+def month_expenses_variation():
+    perc_var = sum_expenses_dataframe(df)
+    perc_var = select_columns(
+        fill_nan_with_zero(
+            perc_month_variation(perc_var)
+        ), 
+        ["yearmonth", "year", "month", "variation_percent"]
+    )
+    return perc_var

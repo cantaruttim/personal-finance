@@ -2,10 +2,10 @@ from utils import (
     total_couple_salary_monthly,
     balance,
     consolidating_salary,
-    normalize_yearmonth
+    select_columns
 )
 from month_bill import read_fixed_consumption, consolidated_expenses
-from expenses import build_expenses_report, read_expenses
+from expenses import build_expenses_report, read_expenses, month_expenses_variation
 from installments import build_installments_report, read_installment
 from config.config import FILE_PATH_OUTPUT
 from data.data import (
@@ -13,6 +13,9 @@ from data.data import (
     MONEY_DESIRED_TO_SAVE
 )
 import pandas as pd
+
+# global variables
+value = month_expenses_variation()
 
 # files
 inst = build_installments_report(read_installment())
@@ -29,13 +32,15 @@ exp['should_save'] = (
     exp['total_couple_salary_on_month'] * (MONEY_DESIRED_TO_SAVE / 100)
 )
 
-print("\n")
-print("Consolidated expenses ... \n")
-fixed = read_fixed_consumption()
-fixed = normalize_yearmonth(fixed)
-fixed = consolidated_expenses(fixed)
+exp = select_columns(
+    exp,
+    [
+     "card",
+     "card_flag",
+     "owner",
+     "yearmonth",
+     "total_expend_on_month",
+     "should_save"
+    ]
+)
 
-print("")
-
-print(fixed)
-print(exp)
