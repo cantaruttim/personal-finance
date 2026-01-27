@@ -7,7 +7,6 @@ from utils import (
 )
 from expenses import build_expenses_report, read_expenses, month_expenses_variation
 from installments import build_installments_report, read_installment
-from config.config import FILE_PATH_OUTPUT
 from data.data import (
     SALARY, 
     MONEY_DESIRED_TO_SAVE
@@ -46,17 +45,18 @@ exp = fill_nan_with_zero(
     )
 )
 
-exp = fill_nan_with_zero(
-    exp
-        .merge(
+def finantial_report(exp, value):
+    exp = fill_nan_with_zero(
+        exp.merge(
             select_columns(
-                value, 
+                value,
                 ["yearmonth", "variation_percent"]
-            ), 
-            on="yearmonth", 
-            how='left',
-            suffixes=('', '_from_value')
+            ),
+            on="yearmonth",
+            how="left",
+            suffixes=("", "_from_value")
         )
-)
+    )
+    return exp
 
-print(exp)
+print(finantial_report(exp, value))      
