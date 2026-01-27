@@ -34,7 +34,6 @@ def build_expenses_report(expenses):
 
     return expenses
 
-
 def sum_expenses_dataframe(df):
     value = normalize_yearmonth(
         df
