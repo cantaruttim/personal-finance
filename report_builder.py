@@ -35,5 +35,7 @@ fixed = read_fixed_consumption()
 fixed = normalize_yearmonth(fixed)
 fixed = consolidated_expenses(fixed)
 
+print("")
+
 print(fixed)
 print(exp)

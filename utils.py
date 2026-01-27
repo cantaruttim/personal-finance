@@ -1,4 +1,5 @@
 import pandas as pd
+from datetime import datetime
 from data.data import (
     TENTH,
     MONEY_DESIRED_TO_SAVE,
@@ -119,3 +120,24 @@ def balance(exp):
         4
     )
     return exp
+
+
+def perc_month_variation(value):
+    value['yearmonth'] = value['yearmonth'].astype(str).str.zfill(6)
+
+    value['year'] = value['yearmonth'].str[-4:].astype(int)
+    value['month'] = value['yearmonth'].str[:2].astype(int)
+
+    value = value.sort_values(['year', 'month']).reset_index(drop=True)
+
+    value['next_value'] = value.groupby('year')['value'].shift(-1)
+
+    value['variation_percent'] = (
+        (value['next_value'] - value['value']) / value['value']
+    ) * 100
+
+    value['variation_percent'] = value['variation_percent'].round(2)
+
+    current_year = datetime.now().year
+    value = value[value['year'] == current_year].reset_index(drop=True)
+    return value

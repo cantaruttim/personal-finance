@@ -28,3 +28,11 @@ def build_expenses_report(expenses):
     expenses['total_expend_on_month'] = expenses['total_expend_on_month'] - DANI_VALUE
 
     return expenses
+
+df = total_expend_on_month(read_expenses(), "yearmonth", "value")
+
+value = normalize_yearmonth(
+    df
+    .groupby('yearmonth', as_index=False)['value']
+    .sum()
+)
