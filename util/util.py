@@ -1,10 +1,14 @@
 import pandas as pd
 
 def ajuste_padrao_anomes(df, coluna: str):
+    ''''
+        Ajusta o padrão do ANOMES para MMYYYY
+    '''
     df[f'{coluna}'] = df[f'{coluna}'].astype(str).str.zfill(6)
     return df
 
 def fillna_zero(df):
+    '''Substitui os casos NaN -> 0'''
     df = df.fillna(0)
     return df
 
