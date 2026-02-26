@@ -86,4 +86,44 @@ def comprometimento_fatura_proximo_mes(df):
         .where(mask, 0)
         .cumsum()
     )
+    # valor = df['COMPROMETIDO'].iloc[-1:]
+    return df
+
+def retorna_valor_emprestado(df):
+    ''''
+        Calcula o valor total emprestado
+        Valor deve ser abatido do valor total da fatura
+    '''
+    emprestado = (
+        df[ df['DESCRIPTION'].str.contains("D CLINIC ESTETICA")]
+    )
+    emprestado = emprestado['VALUE'].sum()
+    return emprestado
+
+
+def atualizar_comprometido_liquido(df, empr, coluna='COMPROMETIDO'):
+    """
+    Substitui a coluna COMPROMETIDO pelo valor final acumulado
+    menos o valor emprestado (empr).
+    
+    Parâmetros:
+        df (pd.DataFrame): DataFrame original
+        empr (float): valor a ser descontado
+        coluna (str): nome da coluna acumulada
+        
+    Retorna:
+        pd.DataFrame: DataFrame atualizado
+    """
+    
+    df = df.copy()
+    
+    if coluna not in df.columns:
+        raise ValueError(f"A coluna '{coluna}' não existe no DataFrame.")
+    
+    if df.empty:
+        raise ValueError("O DataFrame está vazio.")
+    
+    valor_final = df[coluna].iloc[-1] - empr
+    df[coluna] = valor_final
+    
     return df
