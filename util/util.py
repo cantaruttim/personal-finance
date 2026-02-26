@@ -61,17 +61,29 @@ def filtrar_mes_mais_recente(df, coluna_anomes='ANOMES'):
         pd.DataFrame: DataFrame filtrado apenas com o mês mais recente
     """
     
-    # Converte temporariamente para datetime (sem criar coluna no df)
     datas = pd.to_datetime(
         df[coluna_anomes].astype(str),
         format='%m%Y',
         errors='coerce'
     )
     
-    # Identifica a data mais recente
     data_max = datas.max()
     
-    # Filtra apenas o mês mais recente
     df_filtrado = df[datas == data_max].copy()
     
     return df_filtrado
+
+
+def comprometimento_fatura_proximo_mes(df):
+    ''''
+        Calcula o valor da próxima fatura baseado no valor das parcelas
+        já comprometidas
+    '''
+    mask = df['PAID'] <= df['TOTAL']
+
+    df['COMPROMETIDO'] = (
+        df['VALUE']
+        .where(mask, 0)
+        .cumsum()
+    )
+    return df
