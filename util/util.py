@@ -26,3 +26,13 @@ def gasto_total_consolidado(df):
     df = df[['ANOMES', 'GASTO_MENSAL']].drop_duplicates()
     df['PERC_VARIACAO'] = round((df['GASTO_MENSAL'] - df['GASTO_MENSAL'].shift(1)) / df['GASTO_MENSAL'], 6) * 100
     return df
+
+def select_columns(df, columns : list):
+    '''
+        Seleciona uma lista de colunas de maneira dinâmica
+    '''
+def select_columns(df, columns: list):
+    """
+    Seleciona uma lista de colunas de maneira dinâmica
+    """
+    return df[columns].drop_duplicates()
