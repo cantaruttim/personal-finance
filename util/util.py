@@ -8,6 +8,16 @@ substraction = "D CLINIC ESTETICA"
  "====================="
 '''
 
+def salva_arquivo_consolidado(df, FILE_PATH_OUTPUT, FILE_NAME):
+    print("Salvando arquivo consolidado ... ")
+    try:
+        print(f"Documento consolidado salvo em ... {FILE_PATH_OUTPUT} ... ")
+        df.to_excel(f"{FILE_PATH_OUTPUT}{FILE_NAME}.xlsx", index=False)
+        print("Documento salvo com sucesso!!!")
+    except:
+        print(ValueError)
+
+
 def ajuste_padrao_anomes(df, coluna: str):
     ''''
         Ajusta o padrão do ANOMES para MMYYYY

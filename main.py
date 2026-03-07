@@ -1,12 +1,15 @@
 import pandas as pd
-from config.config import FILE_PATH, FILE_PATH_OUTPUT
+from config.config import FILE_PATH, FILE_PATH_OUTPUT, FILE_NAME
 from util.util import (
     ajuste_padrao_anomes, 
     gasto_total_consolidado,
     gasto_total_mensal,
     fillna_zero,
-    borrowed_money_by_anomes
+    borrowed_money_by_anomes,
+    salva_arquivo_consolidado
 )
+
+
 gastos = pd.read_excel(FILE_PATH, sheet_name='gastos')
 gastos = ajuste_padrao_anomes(gastos, 'ANOMES')
 
@@ -42,10 +45,4 @@ gastos = gastos.merge(df, on="ANOMES", how="left")
 
 print(gastos)
 
-print("Salvando arquivo consolidado ... ")
-try:
-    print(f"Documento consolidado salvo em ... {FILE_PATH_OUTPUT} ... ")
-    gastos.to_excel(f"{FILE_PATH_OUTPUT}finance_report_consolidated.xlsx", index=False)
-    print("Documento salvo com sucesso!!!")
-except:
-    print(ValueError)
+salva_arquivo_consolidado(df, FILE_PATH_OUTPUT, FILE_NAME)
