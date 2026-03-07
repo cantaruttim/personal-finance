@@ -5,7 +5,8 @@ from util.util import (
     gasto_total_consolidado,
     gasto_total_mensal,
     fillna_zero,
-    removing_borrow_money
+    retorna_valor_emprestado,
+    borrowed_money_by_anomes
 )
 
 gastos = pd.read_excel(FILE_PATH, sheet_name='gastos')
@@ -16,7 +17,10 @@ df = fillna_zero(gasto_total_consolidado(gastos))
 gastos = gastos.drop(columns=['GASTO_MENSAL'])
 gastos = gastos.merge(df, on="ANOMES", how="left")
 
-notmy = removing_borrow_money(gastos)
+
+
+notmy = borrowed_money_by_anomes(gastos)
+# notmy = notmy[['ANOMES', 'BORROWED']]
 print(notmy)
 
 # print("Salvando arquivo consolidado ... ")

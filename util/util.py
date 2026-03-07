@@ -131,10 +131,11 @@ def atualizar_comprometido_liquido(df, empr, coluna='COMPROMETIDO'):
     return df
 
 
-def removing_borrow_money(df):
+def borrowed_money_by_anomes(df):
     # not my
     notmy = df[ df['DESCRIPTION'].str.contains(substraction) ]
     notmy = notmy[['ANOMES', 'VALUE']]
     notmy['BORROWED'] = notmy['VALUE'] * -1
+    notmy = notmy[['ANOMES', 'BORROWED']]
     # notmy = notmy.groupby('ANOMES')['VALUE'].sum()
     return notmy
