@@ -5,23 +5,27 @@ from util.util import (
     gasto_total_consolidado,
     gasto_total_mensal,
     fillna_zero,
-    retorna_valor_emprestado,
     borrowed_money_by_anomes
 )
 
 gastos = pd.read_excel(FILE_PATH, sheet_name='gastos')
 gastos = ajuste_padrao_anomes(gastos, 'ANOMES')
-gastos = gasto_total_mensal(gastos, 2050, 'ANOMES', 'VALUE')
+gastos = gasto_total_mensal(gastos, 2050, 'ANOMES', 'VALUE') ## value must be by month
 df = fillna_zero(gasto_total_consolidado(gastos))
 
 gastos = gastos.drop(columns=['GASTO_MENSAL'])
 gastos = gastos.merge(df, on="ANOMES", how="left")
 
+print(gastos)
+
+
+df = gastos.groupby('ANOMES')['PERC_VARIACAO'].mean()
+print(df)
 
 
 notmy = borrowed_money_by_anomes(gastos)
 # notmy = notmy[['ANOMES', 'BORROWED']]
-print(notmy)
+# print(notmy)
 
 # print("Salvando arquivo consolidado ... ")
 # try:
