@@ -23,12 +23,16 @@ def fillna_zero(df):
 
 
 def gasto_total_mensal(df, value_discont, categorical, numerical):
-    ''''
-        Função que consolida por anomes a variação do gasto mensal.
-    '''
-    df['GASTO_MENSAL'] = (df.groupby(categorical)[numerical].transform('sum') - value_discont)
-    return df
 
+    if value_discont not in df.columns:
+        raise ValueError(f'Coluna {value_discont} não encontrada no DataFrame')
+
+    df[value_discont] = df[value_discont].fillna(0)
+
+    df['GASTO_MENSAL'] = (
+        df.groupby(categorical)[numerical].transform('sum') +  df[value_discont]
+    )
+    return df
 
 def gasto_total_consolidado(df):
     ''''
