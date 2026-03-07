@@ -1,5 +1,7 @@
 import pandas as pd
 
+substraction = "D CLINIC ESTETICA"
+
 '''
  "===================="
  "===FUNÇÕES GERAIS==="
@@ -127,3 +129,12 @@ def atualizar_comprometido_liquido(df, empr, coluna='COMPROMETIDO'):
     df[coluna] = valor_final
     
     return df
+
+
+def removing_borrow_money(df):
+    # not my
+    notmy = df[ df['DESCRIPTION'].str.contains(substraction) ]
+    notmy = notmy[['ANOMES', 'VALUE']]
+    notmy['BORROWED'] = notmy['VALUE'] * -1
+    # notmy = notmy.groupby('ANOMES')['VALUE'].sum()
+    return notmy

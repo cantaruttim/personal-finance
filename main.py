@@ -4,7 +4,8 @@ from util.util import (
     ajuste_padrao_anomes, 
     gasto_total_consolidado,
     gasto_total_mensal,
-    fillna_zero
+    fillna_zero,
+    removing_borrow_money
 )
 
 gastos = pd.read_excel(FILE_PATH, sheet_name='gastos')
@@ -15,10 +16,12 @@ df = fillna_zero(gasto_total_consolidado(gastos))
 gastos = gastos.drop(columns=['GASTO_MENSAL'])
 gastos = gastos.merge(df, on="ANOMES", how="left")
 
+notmy = removing_borrow_money(gastos)
+print(notmy)
 
-print("Salvando arquivo consolidado ... ")
-try:
-    gastos.to_excel(f"{FILE_PATH_OUTPUT}finance_report_consolidated.xlsx", index=False)
-    print("Documento salvo com sucesso!!!")
-except:
-    print(ValueError)
+# print("Salvando arquivo consolidado ... ")
+# try:
+#     gastos.to_excel(f"{FILE_PATH_OUTPUT}finance_report_consolidated.xlsx", index=False)
+#     print("Documento salvo com sucesso!!!")
+# except:
+#     print(ValueError)
