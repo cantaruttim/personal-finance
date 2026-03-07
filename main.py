@@ -1,5 +1,9 @@
 import pandas as pd
-from config.config import FILE_PATH, FILE_PATH_OUTPUT, FILE_NAME
+from config.config import (
+    FILE_PATH, 
+    FILE_PATH_OUTPUT, 
+    FILE_NAME
+)
 from util.util import (
     ajuste_padrao_anomes, 
     gasto_total_consolidado,
