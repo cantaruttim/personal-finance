@@ -30,7 +30,7 @@ def gasto_total_mensal(df, value_discont, categorical, numerical):
     df[value_discont] = df[value_discont].fillna(0)
 
     df['GASTO_MENSAL'] = (
-        df.groupby(categorical)[numerical].transform('sum') +  df[value_discont]
+        df.groupby(categorical)[numerical].transform('sum') + df[value_discont]
     )
     return df
 
