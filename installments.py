@@ -1,18 +1,25 @@
 import pandas as pd
-from config.config import FILE_PATH_INSTALL
+import numpy as np
 from util.util import (
-    ajuste_padrao_anomes, 
-    filtrar_mes_mais_recente,
-    comprometimento_fatura_proximo_mes,
-    retorna_valor_emprestado,
-    atualizar_comprometido_liquido
+    ajuste_padrao_anomes,
+    gasto_total_mensal
 )
 
-install = pd.read_excel(FILE_PATH_INSTALL , 'installments')
+install = pd.read_excel('./data/finance_report.xlsx' , 'parcelados')
 install = ajuste_padrao_anomes(install, 'ANOMES')
-install = filtrar_mes_mais_recente(install)
-install = comprometimento_fatura_proximo_mes(install)
-empr = retorna_valor_emprestado(install)
-install = atualizar_comprometido_liquido(install, empr)
 
-print(install)
+install['STATUS'] = np.where(
+    (install['PARC_ATUAL'] < install['ULTI_PARC']) |
+    ((install['PARC_ATUAL'] == '-') & (install['ULTI_PARC'] == '-')),
+    'Paying',
+    'Over'
+)
+
+paying = install[ install['STATUS'] == "Paying"]
+over = install[ install['STATUS'] == "Over"]
+
+paying['TOTAL'] = paying.groupby('ANOMES')['VALUE'].transform('sum')
+over['TOTAL'] = over.groupby('ANOMES')['VALUE'].transform('sum')
+
+print(over)
+print(paying)
