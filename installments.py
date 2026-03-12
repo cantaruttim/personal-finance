@@ -15,8 +15,8 @@ install['STATUS'] = np.where(
     'Over'
 )
 
-paying = install[ install['STATUS'] == "Paying"]
-over = install[ install['STATUS'] == "Over"]
+paying = install[ install['STATUS'] == "Paying" ]
+over = install[ install['STATUS'] == "Over" ]
 
 paying['TOTAL'] = paying.groupby('ANOMES')['VALUE'].transform('sum')
 over['TOTAL'] = over.groupby('ANOMES')['VALUE'].transform('sum')
