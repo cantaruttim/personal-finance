@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 from util.util import (
-    ajuste_padrao_anomes,
-    gasto_total_mensal
+    ajuste_padrao_anomes
 )
 
 install = pd.read_excel('./data/finance_report.xlsx' , 'parcelados')
