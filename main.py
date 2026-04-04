@@ -10,7 +10,8 @@ from util.util import (
     gasto_total_mensal,
     fillna_zero,
     borrowed_money_by_anomes,
-    salva_arquivo_consolidado
+    salva_arquivo_consolidado,
+    categorize_and_group
 )
 
 
@@ -27,6 +28,9 @@ borrowed_grouped = (
     notmy.groupby('ANOMES', as_index=False)['BORROWED'].sum()
 )
 
+print('\n')
+
+print("Gastos mensais ... ")
 gastos = gastos.merge(
     borrowed_grouped,
     on='ANOMES',
@@ -48,5 +52,7 @@ gastos = gastos.drop(columns=['GASTO_MENSAL'])
 gastos = gastos.merge(df, on="ANOMES", how="left")
 
 print(gastos)
+
+print(categorize_and_group(gastos))
 
 salva_arquivo_consolidado(df, FILE_PATH_OUTPUT, FILE_NAME)

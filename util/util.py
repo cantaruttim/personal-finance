@@ -1,6 +1,29 @@
 import pandas as pd
+import re
 
 substraction = ["D CLINIC ESTETICA", "JIM.COM D CLINIC"]
+categories = [
+    "ASS DE DEUS MIN IPIRAN ", 
+    "SUPERMERCADO CARIOCA H", 
+    "MEP*NAZAREIAS",
+    "JmHonestMarket",
+    "DROGASIL3287",
+    "AUTO POSTO",
+    "AUTO",
+    "ASSAI ATACADISTA",
+    "PARC*MP*DETRANSP",
+    "DETRANSP",
+    "BILHETEUNICOSAOPAULO",
+    "UBER* TRIP",
+    "UBER*",
+    "99*",
+    "NET PGT*Fatura Claro",
+    "FLEXPAG*ENELSP",
+    "TOTALPASS",
+    "Wellhub",
+    "MP*SIMPLESNACIONAL"
+]
+
 
 '''
  "===================="
@@ -154,3 +177,27 @@ def borrowed_money_by_anomes(df):
     notmy = notmy[['ANOMES', 'BORROWED']]
 
     return notmy
+
+
+def categorize_and_group(df):
+    df = df.copy()
+
+    # função para encontrar a categoria
+    def find_category(desc):
+        for cat in categories:
+            pattern = re.escape(cat).replace(r'\*', '.*')  # trata * como wildcard
+            if re.search(pattern, str(desc), re.IGNORECASE):
+                return cat
+        return "OUTROS"
+
+    # cria coluna de categoria
+    df['DESCRIPTION'] = df['DESCRIPTION'].apply(find_category)
+
+    # agrupa
+    grouped = (
+        df.groupby(['ANOMES', 'DESCRIPTION'])['VALUE']
+        .sum()
+        .reset_index()
+    )
+
+    return grouped
