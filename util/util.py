@@ -1,8 +1,10 @@
 import pandas as pd
 import re
 
-substraction = ["D CLINIC ESTETICA", "JIM.COM D CLINIC"]
+substraction = ["D CLINIC ESTETICA", "JIM.COM D CLINIC E"]
 categories = [
+    "D CLINIC ESTETICA",
+    "JIM.COM D CLINIC",
     "ASS DE DEUS MIN IPIRAN ", 
     "SUPERMERCADO CARIOCA H", 
     "MEP*NAZAREIAS",
@@ -23,7 +25,46 @@ categories = [
     "Wellhub",
     "MP*SIMPLESNACIONAL"
 ]
-
+macro_categories = {
+    "ALIMENTACAO": [
+        "SUPERMERCADO CARIOCA H",
+        "ASSAI ATACADISTA",
+        "JmHonestMarket"
+    ],
+    "SAUDE": [
+        "DROGASIL3287"
+    ],
+    "DOACAO_RELIGIOSO": [
+        "ASS DE DEUS MIN IPIRAN"
+    ],
+    "TRANSPORTE": [
+        "UBER* TRIP",
+        "UBER*",
+        "99*",
+        "BILHETEUNICOSAOPAULO"
+    ],
+    "VEICULO": [
+        "AUTO POSTO",
+        "AUTO",
+        "DETRANSP",
+        "PARC*MP*DETRANSP"
+    ],
+    "CONTAS_SERVICOS": [
+        "FLEXPAG*ENELSP",
+        "NET PGT*Fatura Claro"
+    ],
+    "BEM_ESTAR": [
+        "TOTALPASS",
+        "Wellhub"
+    ],
+    "IMPOSTOS": [
+        "MP*SIMPLESNACIONAL"
+    ],
+    "EMPRÉSTIMOS": [
+        "D CLINIC ESTETICA",
+        "JIM.COM D CLINIC E"
+    ]
+}
 
 '''
  "===================="
@@ -182,18 +223,15 @@ def borrowed_money_by_anomes(df):
 def categorize_and_group(df):
     df = df.copy()
 
-    # função para encontrar a categoria
     def find_category(desc):
         for cat in categories:
-            pattern = re.escape(cat).replace(r'\*', '.*')  # trata * como wildcard
+            pattern = re.escape(cat).replace(r'\*', '.*') 
             if re.search(pattern, str(desc), re.IGNORECASE):
                 return cat
         return "OUTROS"
 
-    # cria coluna de categoria
     df['DESCRIPTION'] = df['DESCRIPTION'].apply(find_category)
 
-    # agrupa
     grouped = (
         df.groupby(['ANOMES', 'DESCRIPTION'])['VALUE']
         .sum()
@@ -201,3 +239,26 @@ def categorize_and_group(df):
     )
 
     return grouped
+
+def add_macro_category_fast(df):
+    df = df.copy()
+    df['MACRO_CATEGORY'] = 'OUTROS'
+
+    for macro, cats in macro_categories.items():
+        for cat in cats:
+            pattern = re.escape(cat).replace(r'\*', '.*')
+            mask = df['DESCRIPTION'].str.contains(pattern, case=False, na=False)
+
+            df.loc[mask & (df['MACRO_CATEGORY'] == 'OUTROS'), 'MACRO_CATEGORY'] = macro
+
+    return df
+
+def group_macro_category(df):
+    df = add_macro_category_fast(df)
+
+    result = (
+        df.groupby(['ANOMES', 'MACRO_CATEGORY'])['VALUE']
+        .sum()
+        .reset_index()
+    )
+    return result
