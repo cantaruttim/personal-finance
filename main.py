@@ -11,8 +11,8 @@ from util.util import (
     fillna_zero,
     borrowed_money_by_anomes,
     salva_arquivo_consolidado,
-    group_macro_category,
-    add_macro_category_fast
+    add_macro_category_fast,
+    clean_columns
 )
 
 
@@ -56,6 +56,8 @@ gastos = add_macro_category_fast(gastos)
 print("\n")
 print(gastos)
 print("\n")
+
+gastos = clean_columns(gastos)
 
 salva_arquivo_consolidado(df, FILE_PATH_OUTPUT, FILE_NAME)
 salva_arquivo_consolidado(gastos, FILE_PATH_OUTPUT, "finance_personal_report.xlsx")

@@ -88,6 +88,12 @@ def salva_arquivo_consolidado(df, FILE_PATH_OUTPUT, FILE_NAME):
     except:
         print(ValueError)
 
+def clean_columns(df):
+    return (
+        df
+        .loc[:, ~df.columns.str.contains('^Unnamed')]
+        .dropna(axis=1, how='all')
+    )
 
 def ajuste_padrao_anomes(df, coluna: str):
     ''''
