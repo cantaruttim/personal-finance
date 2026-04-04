@@ -4,7 +4,13 @@ from pathlib import Path
 
 class Revenue:
 
-    def __init__(self, owner: str, month: int, year: int, value: float):
+    def __init__(
+            self, 
+            owner: str, 
+            month: int, 
+            year: int, 
+            value: float
+        ):
         self.owner = owner.strip()
         self.month = month
         self.year = year
