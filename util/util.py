@@ -1,7 +1,12 @@
 import pandas as pd
 import re
 
-substraction = ["D CLINIC ESTETICA", "JIM.COM D CLINIC E"]
+substraction = [
+    "D CLINIC ESTETICA", 
+    "JIM.COM D CLINIC E", 
+    "Wellhub Josias Santos F",
+    "Wellhub Ivanir Dos Sant"
+]
 categories = [
     "D CLINIC ESTETICA",
     "JIM.COM D CLINIC",
@@ -62,7 +67,9 @@ macro_categories = {
     ],
     "EMPRÉSTIMOS": [
         "D CLINIC ESTETICA",
-        "JIM.COM D CLINIC E"
+        "JIM.COM D CLINIC E",
+        "Wellhub Josias Santos F",
+        "Wellhub Ivanir Dos Sant"
     ]
 }
 
@@ -170,16 +177,14 @@ def comprometimento_fatura_proximo_mes(df):
     return df
 
 def retorna_valor_emprestado(df):
-    ''''
-        Calcula o valor total emprestado
-        Valor deve ser abatido do valor total da fatura
+    '''
+    Calcula o valor total emprestado com base na MACRO_CATEGORY
     '''
     emprestado = (
-        df[ df['DESCRIPTION'].str.contains("D CLINIC ESTETICA")]
+        df[df['MACRO_CATEGORY'] == 'EMPRÉSTIMOS']['VALUE']
+        .sum()
     )
-    emprestado = emprestado['VALUE'].sum()
     return emprestado
-
 
 def atualizar_comprometido_liquido(df, empr, coluna='COMPROMETIDO'):
     """
