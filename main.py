@@ -11,7 +11,8 @@ from util.util import (
     fillna_zero,
     borrowed_money_by_anomes,
     salva_arquivo_consolidado,
-    group_macro_category
+    group_macro_category,
+    add_macro_category_fast
 )
 
 
@@ -51,12 +52,10 @@ df = fillna_zero(gasto_total_consolidado(gastos))
 gastos = gastos.drop(columns=['GASTO_MENSAL'])
 gastos = gastos.merge(df, on="ANOMES", how="left")
 
+gastos = add_macro_category_fast(gastos)
 print("\n")
 print(gastos)
 print("\n")
 
-categories = group_macro_category(gastos)
-print(categories[categories['MACRO_CATEGORY'] == "EMPRÉSTIMOS"])
-print("\n")
-
 salva_arquivo_consolidado(df, FILE_PATH_OUTPUT, FILE_NAME)
+salva_arquivo_consolidado(gastos, FILE_PATH_OUTPUT, "finance_personal_report.xlsx")
