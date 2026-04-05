@@ -32,15 +32,68 @@ categories = [
 ]
 macro_categories = {
     "ALIMENTACAO": [
+        "JmHonestMarket",
+        "EMPORIO AMINO",
+        "OUTBACK SAO CAETANO",
+        "MARMITARIA NOSTRA CASA",
+        "PIZZARIA TOQUE DO CHEFF",
+        "37773965Faiane",
+        "BRASIL CACAU",
+        "FINI SAO CAETANO SHOPP",
+        "DI BARI RESTAURANTE",
+        "OLIVEIRA RESTAURANTE",
+        "RestauranteSultao",
+        "LOJAS AMERICANAS 527",
+        "BUNK BURGER COMERCIO D",
+        "ASTOR COMERCIO DE ALIME",
+        "DOCERIA CONTEM AMOR",
+        "Mc Donalds",
+        "RestauranteSultao",
+        "CHOCOLANDIA",
+        "SENHORITA FOOD TRUCK",
+        "PIZZARIA E ESFIRRARIA",
+        "VIVANO STEAK",
+        "VIENA EXPRESS SHOPPING",
+        "BOCADO GASTRONOMIA",
+        "BIG BREAD"
+    ],
+    "SEGURO" :[
+        "ZURICH SEGUR"
+    ],
+    "STREAMING":[
+        "NETFLIX.COM",
+        "NETFLIX ENTRETENIMENTO",
+        "DM*helphbomaxcom"
+    ],
+    "COMPRAS_ONLINE":[
+        "MERCADOLIVRE",
+        "MAGAZINELUIZA"
+    ],
+    "MERCADO" : [
+        "MERCADINHO CAMPO LIMPO",
         "SUPERMERCADO CARIOCA H",
         "ASSAI ATACADISTA",
-        "JmHonestMarket"
+        "TOP OVOS"
+    ],
+    "EDUCAÇÃO":[
+        "ADAICOLLEGE-MA"
+        "DIO",
+        "PG *ANHANGUERA ED"
+    ],
+    "ROUPAS_PERFUMES" : [
+        "DORINHOS",
+        "CENTAURO",
+        "OBOTICARIO",
+        "DECATHLON"
     ],
     "SAUDE": [
-        "DROGASIL3287"
+        "DROGASIL3287",
+        "MENDONCA FARMA",
+        "DROGARIA SANTANDER"
     ],
     "DOACAO_RELIGIOSO": [
-        "ASS DE DEUS MIN IPIRAN"
+        "ASS DE DEUS MIN IPIRAN",
+        "AdaiStore"
     ],
     "TRANSPORTE": [
         "UBER* TRIP",
@@ -52,18 +105,50 @@ macro_categories = {
         "AUTO POSTO",
         "AUTO",
         "DETRANSP",
-        "PARC*MP*DETRANSP"
+        "VITRINE DO OLEO",
+        "GP SERVICOS AUTOMO",
+        "CentroAutomotivoE",
+        "GP SERVICOS AUTOMO",
+        "SOL DOURADO AUTO SERVI",
+        "AUTO P B"
+    ],
+    "ESTACIONAMENTO": [
+        "PIERRY PARK",
+        "CENTURY A PARK ESTACIO"
+    ],
+    "ASSINATURAS_TECH": [
+        "Google One",
+        "Microsoft*Microsoft 365",
+        "APPLE.COM/BILL"
+
     ],
     "CONTAS_SERVICOS": [
         "FLEXPAG*ENELSP",
-        "NET PGT*Fatura Claro"
+        "NET PGT*Fatura Claro",
+        "RECVIVO",
+        "PGCONTA HUBERT IMOVEIS"
+    ],
+    "CLUBES_PONTOS":[
+        "Azul Linhas Aereas Bras",
+        "LIVELO*Clube Live",
+        "Lyra *ACCOR"
     ],
     "BEM_ESTAR": [
         "TOTALPASS",
-        "Wellhub"
+        "Wellhub",
+        "ASAAS*EBTE",
+        "NAZAREIAS",
+        "FUN FUNCHAL"
+    ],
+    "BELEZA_MAQUIAGEM": [
+        "MAKIBELLA",
+        "BARBEARIANOVOESTI"
     ],
     "IMPOSTOS": [
-        "MP*SIMPLESNACIONAL"
+        "MP*SIMPLESNACIONAL",
+        "PARC*MP*DETRANSP",
+        "PGCONTA IPVA"
+
     ],
     "EMPRÉSTIMOS": [
         "D CLINIC ESTETICA",

@@ -12,8 +12,7 @@ from util.util import (
     borrowed_money_by_anomes,
     salva_arquivo_consolidado,
     add_macro_category_fast,
-    group_macro_category,
-    clean_columns
+    group_macro_category
 )
 
 
@@ -67,12 +66,16 @@ gastos = gastos.merge(
     suffixes=('', '_BY_MACRO_CATEGORY')
 )
 
-gastos = clean_columns(gastos)
-
 print("\n")
 print("Seu relatório está quase pronto ...")
 print(gastos)
 print("\n")
+
+def clean_dataframe(df):
+    df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+    return df
+
+gastos = clean_dataframe(gastos)
 
 salva_arquivo_consolidado(df, FILE_PATH_OUTPUT, FILE_NAME)
 salva_arquivo_consolidado(gastos, FILE_PATH_OUTPUT, "finance_personal_report")
