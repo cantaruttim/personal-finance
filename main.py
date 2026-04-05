@@ -75,4 +75,4 @@ print(gastos)
 print("\n")
 
 salva_arquivo_consolidado(df, FILE_PATH_OUTPUT, FILE_NAME)
-salva_arquivo_consolidado(gastos, FILE_PATH_OUTPUT, "finance_personal_report.xlsx")
+salva_arquivo_consolidado(gastos, FILE_PATH_OUTPUT, "finance_personal_report")

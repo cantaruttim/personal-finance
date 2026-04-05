@@ -1,8 +1,13 @@
 from scipy.interpolate import make_interp_spline
-from util.util import select_columns
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+def select_columns(df, columns: list):
+    """
+    Seleciona uma lista de colunas de maneira dinâmica
+    """
+    return df[columns].drop_duplicates()
 
 def grafico_um(df):
     print("Gráfico 1: \n")
@@ -83,3 +88,88 @@ def grafico_um(df):
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
+
+
+df = pd.read_excel("./data/finance_personal_report.xlsx")
+df = df[['ANOMES', 'MACRO_CATEGORY', 'VALUE_BY_MACRO_CATEGORY']]
+df = df[~df['MACRO_CATEGORY'].isin(["OUTROS", "EMPRÉSTIMOS"])]
+
+def prepare_macro_data(df):
+    grouped = (
+        df.groupby(['ANOMES', 'MACRO_CATEGORY'])['VALUE_BY_MACRO_CATEGORY']
+        .sum()
+        .reset_index()
+    )
+
+    pivot_df = grouped.pivot(
+        index='ANOMES',
+        columns='MACRO_CATEGORY',
+        values='VALUE_BY_MACRO_CATEGORY'
+    ).fillna(0)
+
+    return pivot_df
+
+def macro_percentage(df):
+    pivot_df = prepare_macro_data(df)
+
+    percent_df = pivot_df.div(pivot_df.sum(axis=1), axis=0) * 100
+
+    return percent_df.reset_index()
+
+
+def grafico_dois(df):
+    pivot_df = prepare_macro_data(df)
+
+    pivot_df.plot(kind='bar')
+
+    plt.xlabel('ANOMES')
+    plt.ylabel('Valor')
+    plt.title('Gastos por Macro Categoria')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(
+        "./data/graficos/grafico_dois.png", 
+        dpi=300, 
+        bbox_inches='tight'
+    )
+    plt.show()
+
+
+def grafico_dois_um(df):
+    pivot_df = prepare_macro_data(df)
+
+    pivot_df.plot(kind='bar', stacked=True)
+
+    plt.xlabel('ANOMES')
+    plt.ylabel('Valor')
+    plt.title('Evolução de Gastos (Stacked)')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(
+        "./data/graficos/grafico_dois_um.png", 
+        dpi=300, 
+        bbox_inches='tight'
+    )
+    plt.show()
+
+def grafico_dois_dois(df):
+    percent_df = macro_percentage(df).set_index('ANOMES')
+
+    percent_df.plot(kind='bar', stacked=True)
+
+    plt.xlabel('ANOMES')
+    plt.ylabel('%')
+    plt.title('Distribuição Percentual por Macro Categoria')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig(
+        "./data/graficos/grafico_dois_dois.png", 
+        dpi=300, 
+        bbox_inches='tight'
+    )
+    plt.show()
+
+
+grafico_dois(df)
+grafico_dois_um(df)
+grafico_dois_dois(df)
