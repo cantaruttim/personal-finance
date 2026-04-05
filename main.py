@@ -12,6 +12,7 @@ from util.util import (
     borrowed_money_by_anomes,
     salva_arquivo_consolidado,
     add_macro_category_fast,
+    group_macro_category,
     clean_columns
 )
 
@@ -19,7 +20,8 @@ from util.util import (
 gastos = pd.read_excel(FILE_PATH, sheet_name='gastos')
 gastos = ajuste_padrao_anomes(gastos, 'ANOMES')
 
-print("conferindo valor ... ")
+print('\n')
+print("conferindo valor total mensal ... ")
 print(gastos.groupby('ANOMES')['VALUE'].sum())
 print('\n')
 
@@ -30,13 +32,13 @@ borrowed_grouped = (
 )
 
 print('\n')
-
-print("Gastos mensais ... ")
 gastos = gastos.merge(
     borrowed_grouped,
     on='ANOMES',
     how='left'
 )
+
+print('\n')
 
 gastos = (
     gasto_total_mensal(
@@ -46,18 +48,31 @@ gastos = (
         'VALUE'
     )
 )
-
+print("\n")
+print("Realizando tratamentos iniciais ...")
 df = fillna_zero(gasto_total_consolidado(gastos))
 
 gastos = gastos.drop(columns=['GASTO_MENSAL'])
 gastos = gastos.merge(df, on="ANOMES", how="left")
 
 gastos = add_macro_category_fast(gastos)
-print("\n")
-print(gastos)
-print("\n")
+
+categories = group_macro_category(gastos)
+
+
+gastos = gastos.merge(
+    categories,
+    on=['ANOMES', 'MACRO_CATEGORY'],
+    how='left',
+    suffixes=('', '_BY_MACRO_CATEGORY')
+)
 
 gastos = clean_columns(gastos)
+
+print("\n")
+print("Seu relatório está quase pronto ...")
+print(gastos)
+print("\n")
 
 salva_arquivo_consolidado(df, FILE_PATH_OUTPUT, FILE_NAME)
 salva_arquivo_consolidado(gastos, FILE_PATH_OUTPUT, "finance_personal_report.xlsx")
