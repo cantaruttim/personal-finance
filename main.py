@@ -11,7 +11,7 @@ from util.util import (
     gasto_total_mensal,
     fillna_zero,
     borrowed_money_by_anomes,
-    salva_arquivo_consolidado    
+    salva_multiplas_abas
 )
 
 
@@ -67,34 +67,31 @@ gastos = clean_dataframe(gastos)
 
 def classificar_gasto_cartao(descricao):
     """
-    Classifica gastos de cartão de crédito/débito baseado apenas na descrição.
-    Retorna: (categoria_macro, categoria_l2, score)
+    
+        Pipeline que classifica gastos de cartão de crédito/débito baseado apenas na descrição.
+        Retorna: (categoria_macro, categoria_l2, score) para as descrições passadas pelo classificador
+    
     """
     desc = str(descricao).lower().strip()
     
-    # ========== PRÉ-PROCESSAMENTO MELHORADO ==========
-    desc = re.sub(r'\d{2}/\d{2}', '', desc)         
-    desc = re.sub(r'\s+', ' ', desc)                 
+    # ========== PRÉ-PROCESSAMENTO ==========
+    # Remove qualquer padrão de parcela/data do tipo "01/02", "02/02", etc.
+    desc = re.sub(r'\d{2}/\d{2}', '', desc)
+    desc = re.sub(r'\s+', ' ', desc)
     desc = desc.strip()
     
+    # Remove prefixos comuns de gateway (mas preserva parte relevante)
     desc = re.sub(r'^(mp\*|asaas\*|zp\*|hna\*|pg\*|jim\.com\s*)', '', desc)
     
     # ========== CASOS DIRETOS PRIORITÁRIOS ==========
+    # (Organizados: primeiro específicos de categorias, depois transferências)
     casos_diretos = [
+        # --- CONDOMÍNIO ---
         (r'pgconta hubert imo', 'Residência', 'Condomínio', 1.0),
         (r'pgconta.*imo|condominio', 'Residência', 'Condomínio', 0.95),
-        (r'mp\*bancobradescosa|bancobradescosa', 'Residência', 'Condomínio', 1.0),
+        (r'bancobradescosa', 'Residência', 'Condomínio', 1.0),
         
-        (r'ana?ju?h', 'Educação', 'Identidade Visual / Marketing', 0.95),
-        (r'gol linhas a\*gnef', 'Estilo de Vida', 'Passagens Aéreas', 0.95),
-        (r'siciliano utensili', 'Estilo de Vida', 'Utilidades Domésticas', 0.85),
-        (r'pare azul', 'Automóvel', 'Estacionamento', 0.9),
-        (r'jim\.com', 'Prioridade Financeira', 'Transferência a Pessoa', 0.9),
-
-        (r'[a-z]+\s+[a-z]+\s+[a-z]+', 'Prioridade Financeira', 'Transferência a Pessoa', 0.7),
-        (r'^[a-z]+\s+[a-z]+$', 'Prioridade Financeira', 'Transferência a Pessoa', 0.65),
-        (r'\d{5,}\.?\d*', 'Prioridade Financeira', 'Transferência (CPF)', 0.8),
-        
+        # --- ASSINATURAS E SERVIÇOS DIGITAIS ---
         (r'netflix', 'Estilo de Vida', 'Assinaturas', 0.95),
         (r'helphbomaxcom', 'Estilo de Vida', 'Assinaturas - Streaming', 0.95),
         (r'spotify', 'Estilo de Vida', 'Assinaturas', 0.95),
@@ -105,13 +102,15 @@ def classificar_gasto_cartao(descricao):
         (r'uber.*trip|uber\*', 'Estilo de Vida', 'Mobilidade', 0.95),
         (r'99\*', 'Estilo de Vida', 'Mobilidade', 0.9),
         (r'totalpass|gympass|wellhub|nazareias|sports', 'Estilo de Vida', 'Saúde & Bem-estar', 0.95),
-        (r'azul linhas aereas bras|accor|mino|melimais|livelo|ig\*|azul', 'Estilo de Vida', 'Pontos & Viagens', 0.95),
+        (r'azul linhas aereas bras|accor|mino|melimais|livelo|ig\*', 'Estilo de Vida', 'Pontos & Viagens', 0.95),
         (r'envio mens.automatica', 'Estilo de Vida', 'Serviços Financeiros', 0.95),
         (r'cod3rs', 'Estilo de Vida', 'Mentoria & Carreira', 0.95),
         (r'pg \*coders club', 'Estilo de Vida', 'Mentoria & Carreira', 0.95),
-
+        
+        # --- TRANSPORTE PÚBLICO ---
         (r'bilheteunicosaopaulo', 'Gastos Essenciais', 'Transporte Público', 0.95),
         
+        # --- MERCADOS E ESSENCIAIS ---
         (r'assai|mercado|supermercado|mercadinho|jmhonestmarket|top ovos', 'Gastos Essenciais', 'Supermercado', 0.95),
         (r'drogasil|drogaria|farmacia|mendonca farma|drog|raia280|metro farma', 'Gastos Essenciais', 'Farmácia', 0.95),
         (r'posto|combust|auto posto|centroautomotivoe|auto p b 2 ltda|sol dourado auto servi', 'Gastos Essenciais', 'Combustível', 0.95),
@@ -121,6 +120,7 @@ def classificar_gasto_cartao(descricao):
         (r'marmitaria', 'Gastos Essenciais', 'Marmitas', 0.95),
         (r'astor comercio de alime', 'Gastos Essenciais', 'Mercearia', 0.85),
         
+        # --- COMPRAS ONLINE / MAGAZINES ---
         (r'amazon|amazon marketplace', 'Estilo de Vida', 'Compras Online', 0.9),
         (r'oboticario', 'Estilo de Vida', 'Compras Online', 0.9),
         (r'mercadolivre', 'Estilo de Vida', 'Compras Online', 0.9),
@@ -129,18 +129,23 @@ def classificar_gasto_cartao(descricao):
         (r'decathlon', 'Estilo de Vida', 'Esportes', 0.85),
         (r'chillibeans', 'Estilo de Vida', 'Compras', 0.85),
         
+        # --- DOAÇÕES E IGREJAS ---
         (r'ass de deus min ipiran', 'Estilo de Vida', 'Doações', 0.85),
         (r'ipiranga', 'Estilo de Vida', 'Doações', 0.8),
         
+        # --- RESTAURANTES E ALIMENTAÇÃO FORA ---
         (r'outback|restaurante|pizzaria|burger|mc donalds|mcdonalds|63430674geovanna', 'Estilo de Vida', 'Alimentação', 0.9),
         (r'cafe|cafeteria|emporio amino|doces|37773965faiane|fini|brasil cacau|doceria contem amor|chocolandia|picole sabore mix|senhorita food truck|vivano steak|viena express shopping|tutti frutti|papa dominico mooca|big bread|santa monica paes', 'Estilo de Vida', 'Doces & Padaria', 0.85),
         (r'bocado gastronomia|fun funchal', 'Estilo de Vida', 'Alimentação', 0.85),
         
+        # --- BELEZA E ESTÉTICA ---
         (r'd clinic estetica|almeida studio ha|barbearianovoesti|mp*ciadabeleza|makibella shop', 'Estilo de Vida', 'Beleza & Estética', 0.9),
         
+        # --- LAZER ---
         (r'cinemark|cinema', 'Estilo de Vida', 'Lazer', 0.85),
         (r'action park|rivera beachentennis ltd|century a park estacio|pierry park|deck ipiranga beach sp', 'Estilo de Vida', 'Lazer', 0.85),
         
+        # --- SERVIÇOS FINANCEIROS / BOLETOS ---
         (r'conta vivo|recvivo|claro|fatura|pg\*', 'Prioridade Financeira', 'Contas', 0.95),
         (r'loteriasonline', 'Estilo de Vida', 'Lotérica', 0.95),
         (r'enel|energia|agua|copel', 'Prioridade Financeira', 'Contas', 0.95),
@@ -152,9 +157,25 @@ def classificar_gasto_cartao(descricao):
         (r'zp\*', 'Prioridade Financeira', 'Serviços Financeiros', 0.8),
         (r'mp\*', 'Prioridade Financeira', 'Pagamento Online', 0.85),
         
+        # --- EDUCAÇÃO ---
         (r'anhanguera ed|adaicollege|dio|htm\*adai college', 'Educação', 'Mensalidade', 0.95),
+        (r'ana?ju?h', 'Educação', 'Identidade Visual / Marketing', 0.95),
         
+        # --- SEGUROS ---
         (r'zurich|segur', 'Prioridade Financeira', 'Seguro', 0.9),
+        
+        # --- VIAGENS (aéreas) ---
+        (r'gol linhas a\*gnef', 'Estilo de Vida', 'Passagens Aéreas', 0.95),
+        
+        # --- UTILIDADES DOMÉSTICAS ---
+        (r'siciliano utensili', 'Estilo de Vida', 'Utilidades Domésticas', 0.85),
+        (r'pare azul', 'Automóvel', 'Estacionamento', 0.9),
+        
+        # --- TRANSFERÊNCIAS A PESSOAS (FALLBACK - apenas se nada acima casou) ---
+        (r'jim\.com', 'Prioridade Financeira', 'Transferência a Pessoa', 0.9),
+        (r'[a-z]+\s+[a-z]+\s+[a-z]+', 'Prioridade Financeira', 'Transferência a Pessoa', 0.7),
+        (r'^[a-z]+\s+[a-z]+$', 'Prioridade Financeira', 'Transferência a Pessoa', 0.65),
+        (r'\d{5,}\.?\d*', 'Prioridade Financeira', 'Transferência (CPF)', 0.8),
     ]
     
     for pattern, cat, l2, s in casos_diretos:
@@ -215,12 +236,15 @@ def classificar_gasto_cartao(descricao):
     
     # ========== FALLBACKS ==========
     if melhor_score == 0:
+        # Nomes próprios (pessoas físicas) - classifica como transferência
         if re.search(r'[A-Z][a-z]+\s+[A-Z][a-z]+', desc) or re.search(r'\d{5,}', desc):
             return 'Prioridade Financeira', 'Transferência a Pessoa', 0.7
         
+        # Estabelecimentos com CNPJ ou razão social genérica
         if re.search(r'ltda|me$|eireli|comercio|serviços', desc):
             return 'Outros', 'Estabelecimento Genérico', 0.4
         
+        # Nomes curtos sem padrão (ex: MK)
         if len(desc) < 10:
             return 'Outros', 'Não Classificado', 0.2
         
@@ -264,5 +288,11 @@ print(f"Distribuição de categorias macro:")
 print(gastos['categoria_macro'].value_counts())
 
 
-salva_arquivo_consolidado(df, FILE_PATH_OUTPUT, FILE_NAME)
-salva_arquivo_consolidado(gastos, FILE_PATH_OUTPUT, "finance_personal_report")
+abas = {
+    "consolidado_por_mes": df,                    
+    "detalhamento_gastos": gastos,                
+    "resumo_emprestimos": borrowed_grouped,       
+}
+
+# Salva tudo em um único arquivo
+salva_multiplas_abas(abas, FILE_PATH_OUTPUT, "relatorio_financeiro_completo")

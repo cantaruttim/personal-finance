@@ -14,15 +14,26 @@ substraction = [
  "====================="
 '''
 
-def salva_arquivo_consolidado(df, FILE_PATH_OUTPUT, FILE_NAME):
-    print("Salvando arquivo consolidado ... ")
+def salva_multiplas_abas(abas_dict, file_path_output, file_name):
+    """
+    Salva múltiplos DataFrames em um único arquivo Excel, cada um em uma aba.
+    
+    Args:
+        abas_dict: dicionário no formato {nome_da_aba: dataframe}
+        file_path_output: caminho da pasta onde salvar
+        file_name: nome do arquivo (sem extensão)
+    """
+    caminho_completo = f"{file_path_output}{file_name}.xlsx"
+    print(f"Salvando arquivo com {len(abas_dict)} abas em {caminho_completo}...")
+    
     try:
-        print(f"Documento consolidado salvo em ... {FILE_PATH_OUTPUT} ... ")
-        df.to_excel(f"{FILE_PATH_OUTPUT}{FILE_NAME}.xlsx", index=False)
-        print("Documento salvo com sucesso!!!")
-    except:
-        print(ValueError)
-
+        with pd.ExcelWriter(caminho_completo, engine='openpyxl') as writer:
+            for nome_aba, df in abas_dict.items():
+                print(f"  -> Criando aba '{nome_aba}' com {len(df)} linhas")
+                df.to_excel(writer, sheet_name=nome_aba, index=False)
+        print(f"✅ Arquivo salvo com sucesso!")
+    except Exception as e:
+        print(f"❌ Erro ao salvar: {e}")
 
 def ajuste_padrao_anomes(df, coluna: str):
     ''''
@@ -158,27 +169,6 @@ def borrowed_money_by_anomes(df):
     notmy = notmy[['ANOMES', 'BORROWED']]
 
     return notmy
-
-
-def categorize_and_group(df):
-    df = df.copy()
-
-    def find_category(desc):
-        for cat in categories:
-            pattern = re.escape(cat).replace(r'\*', '.*') 
-            if re.search(pattern, str(desc), re.IGNORECASE):
-                return cat
-        return "OUTROS"
-
-    df['DESCRIPTION'] = df['DESCRIPTION'].apply(find_category)
-
-    grouped = (
-        df.groupby(['ANOMES', 'DESCRIPTION'])['VALUE']
-        .sum()
-        .reset_index()
-    )
-
-    return grouped
 
 def group_macro_category(df):
 
