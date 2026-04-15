@@ -73,34 +73,28 @@ def classificar_gasto_cartao(descricao):
     desc = str(descricao).lower().strip()
     
     # ========== PRÉ-PROCESSAMENTO MELHORADO ==========
-    # Remove qualquer padrão de parcela/data do tipo "01/02", "02/02", "12/12", etc.
-    # Inclui casos onde está grudado em palavra (ex: IMO01/02) ou com espaço.
-    desc = re.sub(r'\d{2}/\d{2}', '', desc)          # remove "01/02", "02/02" etc.
-    desc = re.sub(r'\s+', ' ', desc)                 # normaliza espaços
+    desc = re.sub(r'\d{2}/\d{2}', '', desc)         
+    desc = re.sub(r'\s+', ' ', desc)                 
     desc = desc.strip()
     
-    # Remove prefixos comuns de gateway (mas preserva parte relevante)
     desc = re.sub(r'^(mp\*|asaas\*|zp\*|hna\*|pg\*|jim\.com\s*)', '', desc)
     
     # ========== CASOS DIRETOS PRIORITÁRIOS ==========
     casos_diretos = [
-        # --- CONDOMÍNIO (agora funciona com IMO limpo) ---
         (r'pgconta hubert imo', 'Residência', 'Condomínio', 1.0),
         (r'pgconta.*imo|condominio', 'Residência', 'Condomínio', 0.95),
-        (r'mp\*bancobradescosa', 'Residência', 'Condomínio', 1.0),
+        (r'mp\*bancobradescosa|bancobradescosa', 'Residência', 'Condomínio', 1.0),
         
-        # --- NOVOS CASOS IDENTIFICADOS ---
         (r'ana?ju?h', 'Educação', 'Identidade Visual / Marketing', 0.95),
         (r'gol linhas a\*gnef', 'Estilo de Vida', 'Passagens Aéreas', 0.95),
         (r'siciliano utensili', 'Estilo de Vida', 'Utilidades Domésticas', 0.85),
         (r'pare azul', 'Automóvel', 'Estacionamento', 0.9),
         (r'jim\.com', 'Prioridade Financeira', 'Transferência a Pessoa', 0.9),
-        # Nomes próprios e CPFs (transferências)
+
         (r'[a-z]+\s+[a-z]+\s+[a-z]+', 'Prioridade Financeira', 'Transferência a Pessoa', 0.7),
         (r'^[a-z]+\s+[a-z]+$', 'Prioridade Financeira', 'Transferência a Pessoa', 0.65),
         (r'\d{5,}\.?\d*', 'Prioridade Financeira', 'Transferência (CPF)', 0.8),
         
-        # --- CASOS ANTERIORES (mantidos) ---
         (r'netflix', 'Estilo de Vida', 'Assinaturas', 0.95),
         (r'helphbomaxcom', 'Estilo de Vida', 'Assinaturas - Streaming', 0.95),
         (r'spotify', 'Estilo de Vida', 'Assinaturas', 0.95),
@@ -116,10 +110,8 @@ def classificar_gasto_cartao(descricao):
         (r'cod3rs', 'Estilo de Vida', 'Mentoria & Carreira', 0.95),
         (r'pg \*coders club', 'Estilo de Vida', 'Mentoria & Carreira', 0.95),
 
-        # Transporte público
         (r'bilheteunicosaopaulo', 'Gastos Essenciais', 'Transporte Público', 0.95),
         
-        # Mercados e essenciais
         (r'assai|mercado|supermercado|mercadinho|jmhonestmarket|top ovos', 'Gastos Essenciais', 'Supermercado', 0.95),
         (r'drogasil|drogaria|farmacia|mendonca farma|drog|raia280|metro farma', 'Gastos Essenciais', 'Farmácia', 0.95),
         (r'posto|combust|auto posto|centroautomotivoe|auto p b 2 ltda|sol dourado auto servi', 'Gastos Essenciais', 'Combustível', 0.95),
@@ -129,7 +121,6 @@ def classificar_gasto_cartao(descricao):
         (r'marmitaria', 'Gastos Essenciais', 'Marmitas', 0.95),
         (r'astor comercio de alime', 'Gastos Essenciais', 'Mercearia', 0.85),
         
-        # Compras online/magazines
         (r'amazon|amazon marketplace', 'Estilo de Vida', 'Compras Online', 0.9),
         (r'oboticario', 'Estilo de Vida', 'Compras Online', 0.9),
         (r'mercadolivre', 'Estilo de Vida', 'Compras Online', 0.9),
@@ -138,23 +129,18 @@ def classificar_gasto_cartao(descricao):
         (r'decathlon', 'Estilo de Vida', 'Esportes', 0.85),
         (r'chillibeans', 'Estilo de Vida', 'Compras', 0.85),
         
-        # Doações e igrejas
         (r'ass de deus min ipiran', 'Estilo de Vida', 'Doações', 0.85),
         (r'ipiranga', 'Estilo de Vida', 'Doações', 0.8),
         
-        # Restaurantes e alimentação fora
         (r'outback|restaurante|pizzaria|burger|mc donalds|mcdonalds|63430674geovanna', 'Estilo de Vida', 'Alimentação', 0.9),
         (r'cafe|cafeteria|emporio amino|doces|37773965faiane|fini|brasil cacau|doceria contem amor|chocolandia|picole sabore mix|senhorita food truck|vivano steak|viena express shopping|tutti frutti|papa dominico mooca|big bread|santa monica paes', 'Estilo de Vida', 'Doces & Padaria', 0.85),
         (r'bocado gastronomia|fun funchal', 'Estilo de Vida', 'Alimentação', 0.85),
         
-        # Beleza e estética
         (r'd clinic estetica|almeida studio ha|barbearianovoesti|mp*ciadabeleza|makibella shop', 'Estilo de Vida', 'Beleza & Estética', 0.9),
         
-        # Lazer
         (r'cinemark|cinema', 'Estilo de Vida', 'Lazer', 0.85),
         (r'action park|rivera beachentennis ltd|century a park estacio|pierry park|deck ipiranga beach sp', 'Estilo de Vida', 'Lazer', 0.85),
         
-        # Serviços financeiros/boletos
         (r'conta vivo|recvivo|claro|fatura|pg\*', 'Prioridade Financeira', 'Contas', 0.95),
         (r'loteriasonline', 'Estilo de Vida', 'Lotérica', 0.95),
         (r'enel|energia|agua|copel', 'Prioridade Financeira', 'Contas', 0.95),
@@ -166,10 +152,8 @@ def classificar_gasto_cartao(descricao):
         (r'zp\*', 'Prioridade Financeira', 'Serviços Financeiros', 0.8),
         (r'mp\*', 'Prioridade Financeira', 'Pagamento Online', 0.85),
         
-        # Educação
         (r'anhanguera ed|adaicollege|dio|htm\*adai college', 'Educação', 'Mensalidade', 0.95),
         
-        # Seguros
         (r'zurich|segur', 'Prioridade Financeira', 'Seguro', 0.9),
     ]
     
@@ -231,15 +215,12 @@ def classificar_gasto_cartao(descricao):
     
     # ========== FALLBACKS ==========
     if melhor_score == 0:
-        # Nomes próprios (pessoas físicas) - classifica como transferência
         if re.search(r'[A-Z][a-z]+\s+[A-Z][a-z]+', desc) or re.search(r'\d{5,}', desc):
             return 'Prioridade Financeira', 'Transferência a Pessoa', 0.7
         
-        # Estabelecimentos com CNPJ ou razão social genérica
         if re.search(r'ltda|me$|eireli|comercio|serviços', desc):
             return 'Outros', 'Estabelecimento Genérico', 0.4
         
-        # Nomes curtos sem padrão (ex: MK)
         if len(desc) < 10:
             return 'Outros', 'Não Classificado', 0.2
         
