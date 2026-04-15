@@ -11,9 +11,7 @@ from util.util import (
     gasto_total_mensal,
     fillna_zero,
     borrowed_money_by_anomes,
-    salva_arquivo_consolidado,
-    add_macro_category_fast,
-    group_macro_category
+    salva_arquivo_consolidado    
 )
 
 
@@ -55,18 +53,6 @@ df = fillna_zero(gasto_total_consolidado(gastos))
 gastos = gastos.drop(columns=['GASTO_MENSAL'])
 gastos = gastos.merge(df, on="ANOMES", how="left")
 
-gastos = add_macro_category_fast(gastos)
-
-categories = group_macro_category(gastos)
-
-
-gastos = gastos.merge(
-    categories,
-    on=['ANOMES', 'MACRO_CATEGORY'],
-    how='left',
-    suffixes=('', '_BY_MACRO_CATEGORY')
-)
-
 print("\n")
 print("Seu relatório está quase pronto ...")
 print(gastos)
@@ -79,10 +65,6 @@ def clean_dataframe(df):
 gastos = clean_dataframe(gastos)
 
 
-
-import re
-import pandas as pd
-
 def classificar_gasto_cartao(descricao):
     """
     Classifica gastos de cartão de crédito/débito baseado apenas na descrição.
@@ -90,51 +72,105 @@ def classificar_gasto_cartao(descricao):
     """
     desc = str(descricao).lower().strip()
     
+    # ========== PRÉ-PROCESSAMENTO MELHORADO ==========
+    # Remove qualquer padrão de parcela/data do tipo "01/02", "02/02", "12/12", etc.
+    # Inclui casos onde está grudado em palavra (ex: IMO01/02) ou com espaço.
+    desc = re.sub(r'\d{2}/\d{2}', '', desc)          # remove "01/02", "02/02" etc.
+    desc = re.sub(r'\s+', ' ', desc)                 # normaliza espaços
+    desc = desc.strip()
+    
+    # Remove prefixos comuns de gateway (mas preserva parte relevante)
+    desc = re.sub(r'^(mp\*|asaas\*|zp\*|hna\*|pg\*|jim\.com\s*)', '', desc)
+    
     # ========== CASOS DIRETOS PRIORITÁRIOS ==========
     casos_diretos = [
-        # Assinaturas e serviços digitais
+        # --- CONDOMÍNIO (agora funciona com IMO limpo) ---
+        (r'pgconta hubert imo', 'Residência', 'Condomínio', 1.0),
+        (r'pgconta.*imo|condominio', 'Residência', 'Condomínio', 0.95),
+        (r'mp\*bancobradescosa', 'Residência', 'Condomínio', 1.0),
+        
+        # --- NOVOS CASOS IDENTIFICADOS ---
+        (r'ana?ju?h', 'Educação', 'Identidade Visual / Marketing', 0.95),
+        (r'gol linhas a\*gnef', 'Estilo de Vida', 'Passagens Aéreas', 0.95),
+        (r'siciliano utensili', 'Estilo de Vida', 'Utilidades Domésticas', 0.85),
+        (r'pare azul', 'Automóvel', 'Estacionamento', 0.9),
+        (r'jim\.com', 'Prioridade Financeira', 'Transferência a Pessoa', 0.9),
+        # Nomes próprios e CPFs (transferências)
+        (r'[a-z]+\s+[a-z]+\s+[a-z]+', 'Prioridade Financeira', 'Transferência a Pessoa', 0.7),
+        (r'^[a-z]+\s+[a-z]+$', 'Prioridade Financeira', 'Transferência a Pessoa', 0.65),
+        (r'\d{5,}\.?\d*', 'Prioridade Financeira', 'Transferência (CPF)', 0.8),
+        
+        # --- CASOS ANTERIORES (mantidos) ---
         (r'netflix', 'Estilo de Vida', 'Assinaturas', 0.95),
+        (r'helphbomaxcom', 'Estilo de Vida', 'Assinaturas - Streaming', 0.95),
         (r'spotify', 'Estilo de Vida', 'Assinaturas', 0.95),
-        (r'apple\.com|apple bill|applebill', 'Estilo de Vida', 'Assinaturas', 0.95),
+        (r'apple\.com|apple bill|applebill|applecombill|allsignature', 'Estilo de Vida', 'Assinaturas', 0.95),
         (r'google one|microsoft 365|microsoft', 'Estilo de Vida', 'Assinaturas', 0.9),
         (r'ifood|ifd', 'Estilo de Vida', 'Alimentação', 0.95),
         (r'99food', 'Estilo de Vida', 'Alimentação', 0.95),
         (r'uber.*trip|uber\*', 'Estilo de Vida', 'Mobilidade', 0.95),
         (r'99\*', 'Estilo de Vida', 'Mobilidade', 0.9),
-        (r'totalpass|gympass|wellhub', 'Estilo de Vida', 'Saúde/Bem-estar', 0.95),
+        (r'totalpass|gympass|wellhub|nazareias|sports', 'Estilo de Vida', 'Saúde & Bem-estar', 0.95),
+        (r'azul linhas aereas bras|accor|mino|melimais|livelo|ig\*|azul', 'Estilo de Vida', 'Pontos & Viagens', 0.95),
+        (r'envio mens.automatica', 'Estilo de Vida', 'Serviços Financeiros', 0.95),
+        (r'cod3rs', 'Estilo de Vida', 'Mentoria & Carreira', 0.95),
+        (r'pg \*coders club', 'Estilo de Vida', 'Mentoria & Carreira', 0.95),
+
+        # Transporte público
+        (r'bilheteunicosaopaulo', 'Gastos Essenciais', 'Transporte Público', 0.95),
         
         # Mercados e essenciais
-        (r'assai|mercado|supermercado|mercadinho', 'Gastos Essenciais', 'Supermercado', 0.95),
-        (r'drogasil|drogaria|farmacia|drog', 'Gastos Essenciais', 'Farmácia', 0.95),
-        (r'posto|combust|auto posto', 'Gastos Essenciais', 'Combustível', 0.95),
+        (r'assai|mercado|supermercado|mercadinho|jmhonestmarket|top ovos', 'Gastos Essenciais', 'Supermercado', 0.95),
+        (r'drogasil|drogaria|farmacia|mendonca farma|drog|raia280|metro farma', 'Gastos Essenciais', 'Farmácia', 0.95),
+        (r'posto|combust|auto posto|centroautomotivoe|auto p b 2 ltda|sol dourado auto servi', 'Gastos Essenciais', 'Combustível', 0.95),
+        (r'vitrine do oleo|gp servicos automo|centauro ce165|m v derivados', 'Automóvel', 'Manutenção', 0.95),
+        (r'franciscobatistaa', 'Residência', 'Manutenção', 0.95),
+        (r'estapar', 'Automóvel', 'Estacionamento', 0.95),
+        (r'marmitaria', 'Gastos Essenciais', 'Marmitas', 0.95),
+        (r'astor comercio de alime', 'Gastos Essenciais', 'Mercearia', 0.85),
         
         # Compras online/magazines
         (r'amazon|amazon marketplace', 'Estilo de Vida', 'Compras Online', 0.9),
+        (r'oboticario', 'Estilo de Vida', 'Compras Online', 0.9),
         (r'mercadolivre', 'Estilo de Vida', 'Compras Online', 0.9),
         (r'magazine luiza|magalu|mlp', 'Estilo de Vida', 'Compras Online', 0.9),
         (r'lojas americanas', 'Estilo de Vida', 'Compras Online', 0.85),
+        (r'decathlon', 'Estilo de Vida', 'Esportes', 0.85),
         (r'chillibeans', 'Estilo de Vida', 'Compras', 0.85),
-
+        
+        # Doações e igrejas
+        (r'ass de deus min ipiran', 'Estilo de Vida', 'Doações', 0.85),
+        (r'ipiranga', 'Estilo de Vida', 'Doações', 0.8),
+        
         # Restaurantes e alimentação fora
-        (r'outback|restaurante|pizzaria|burger|mc donalds|mcdonalds', 'Estilo de Vida', 'Alimentação', 0.9),
-        (r'cafe|cafeteria', 'Estilo de Vida', 'Alimentação', 0.85),
+        (r'outback|restaurante|pizzaria|burger|mc donalds|mcdonalds|63430674geovanna', 'Estilo de Vida', 'Alimentação', 0.9),
+        (r'cafe|cafeteria|emporio amino|doces|37773965faiane|fini|brasil cacau|doceria contem amor|chocolandia|picole sabore mix|senhorita food truck|vivano steak|viena express shopping|tutti frutti|papa dominico mooca|big bread|santa monica paes', 'Estilo de Vida', 'Doces & Padaria', 0.85),
+        (r'bocado gastronomia|fun funchal', 'Estilo de Vida', 'Alimentação', 0.85),
+        
+        # Beleza e estética
+        (r'd clinic estetica|almeida studio ha|barbearianovoesti|mp*ciadabeleza|makibella shop', 'Estilo de Vida', 'Beleza & Estética', 0.9),
+        
+        # Lazer
+        (r'cinemark|cinema', 'Estilo de Vida', 'Lazer', 0.85),
+        (r'action park|rivera beachentennis ltd|century a park estacio|pierry park|deck ipiranga beach sp', 'Estilo de Vida', 'Lazer', 0.85),
         
         # Serviços financeiros/boletos
-        (r'conta vivo|claro|fatura|pg\*', 'Prioridade Financeira', 'Contas', 0.95),
+        (r'conta vivo|recvivo|claro|fatura|pg\*', 'Prioridade Financeira', 'Contas', 0.95),
+        (r'loteriasonline', 'Estilo de Vida', 'Lotérica', 0.95),
         (r'enel|energia|agua|copel', 'Prioridade Financeira', 'Contas', 0.95),
-        (r'iof|juros|multa|encargos', 'Prioridade Financeira', 'Taxas Bancárias', 1.0),
+        (r'iof|juros|multa|encargos|anuidade diferenci', 'Prioridade Financeira', 'Taxas Bancárias', 1.0),
         (r'estorno|reembolso|anul', 'Prioridade Financeira', 'Estorno', 0.95),
-        (r'ipva', 'Prioridade Financeira', 'Impostos', 0.95),
+        (r'ipva|detransp|simplesnacional', 'Prioridade Financeira', 'Impostos', 0.95),
+        (r'paygo|asaas\*|ebte', 'Prioridade Financeira', 'Serviços Financeiros', 0.9),
+        (r'pgconta(?!.*hubert)', 'Prioridade Financeira', 'Pagamento de Contas', 0.9),
+        (r'zp\*', 'Prioridade Financeira', 'Serviços Financeiros', 0.8),
+        (r'mp\*', 'Prioridade Financeira', 'Pagamento Online', 0.85),
         
         # Educação
-        (r'anhanguera|college|adai', 'Educação', 'Mensalidade', 0.95),
+        (r'anhanguera ed|adaicollege|dio|htm\*adai college', 'Educação', 'Mensalidade', 0.95),
         
         # Seguros
         (r'zurich|segur', 'Prioridade Financeira', 'Seguro', 0.9),
-        
-        # Lazer específico
-        (r'cinemark|cinema', 'Estilo de Vida', 'Lazer', 0.85),
-        (r'park', 'Estilo de Vida', 'Lazer', 0.8),
     ]
     
     for pattern, cat, l2, s in casos_diretos:
@@ -144,34 +180,42 @@ def classificar_gasto_cartao(descricao):
     # ========== REGRAS POR CATEGORIA COM PONTUAÇÃO ==========
     regras = {
         'Gastos Essenciais': {
-            r'mercado|supermercado|mercadinho|assai': 3,
-            r'farmacia|drogaria|drogasil': 3,
-            r'posto|combust|auto posto': 3,
-            r'padaria|acougue': 2,
-            r'feira|hort': 2,
+            r'mercado|supermercado|mercadinho|assai|comercio de alimentos|mercearia': 3,
+            r'farmacia|drogaria|drogasil|raia|metro farma': 3,
+            r'posto|combust|auto posto|shell|ipiranga': 3,
+            r'padaria|acougue|paes|bread': 2,
+            r'feira|hort|fruta': 2,
         },
         'Estilo de Vida': {
-            r'restaurante|pizzaria|burger|lanch|comercio': 2,
-            r'cafe|cafeteria|doceria|sucos': 2,
-            r'shopping|loja|moda|roupa|calçado': 2,
-            r'beleza|estetica|salão|studio|barbearia': 2,
-            r'academia|gym|esporte': 2,
-            r'cinema|teatro|show|parque': 2,
+            r'restaurante|pizzaria|burger|lanch|comercio de alimentos preparados': 2,
+            r'cafe|cafeteria|doceria|sucos|sorvete|chocolate': 2,
+            r'shopping|loja|moda|roupa|calçado|makibella|americanas': 2,
+            r'beleza|estetica|salão|studio|barbearia|cosméticos': 2,
+            r'academia|gym|esporte|decathlon|fitness': 2,
+            r'cinema|teatro|show|parque|entretenimento': 2,
         },
         'Prioridade Financeira': {
-            r'pagamento|conta|boleto|fatura': 3,
-            r'seguro|segur': 2,
-            r'iof|juros|multa|taxa|encargo': 3,
-            r'imposto|ipva|iptu': 3,
+            r'pagamento|conta|boleto|fatura|pgconta|asaas': 3,
+            r'seguro|segur|zurich': 2,
+            r'iof|juros|multa|taxa|encargo|anuidade': 3,
+            r'imposto|ipva|iptu|detran|simples nacional': 3,
+            r'transferência|pix|envio|recebimento': 2,
         },
         'Educação': {
-            r'escola|faculdade|universidade|college|cursos': 3,
-            r'livro|material': 2,
+            r'escola|faculdade|universidade|college|cursos|anhanguera|adai|dio': 3,
+            r'livro|material|cod3rs|mentoria|identidade visual': 2,
         },
         'Saúde': {
-            r'clinica|medico|hospital|consulta|exame': 3,
-            r'fisioterapia|terapia': 2,
+            r'clinica|medico|hospital|consulta|exame|fisioterapia|terapia': 3,
             r'farmacia|drogaria': 2,
+        },
+        'Automóvel': {
+            r'auto servi|manutenção|oleo|derivados|centro automotivo|estapar|estacionamento': 3,
+            r'peças|oficina': 2,
+        },
+        'Residência': {
+            r'franciscobatistaa|hubert imoveis|condomínio|aluguel': 3,
+            r'reforma|construção': 2,
         }
     }
     
@@ -185,30 +229,35 @@ def classificar_gasto_cartao(descricao):
     melhor_categoria = max(scores, key=scores.get)
     melhor_score = scores[melhor_categoria]
     
-    # ========== FALLBACKS quando não encontrou nada ==========
+    # ========== FALLBACKS ==========
     if melhor_score == 0:
-        # Nomes próprios (pessoas físicas)
+        # Nomes próprios (pessoas físicas) - classifica como transferência
         if re.search(r'[A-Z][a-z]+\s+[A-Z][a-z]+', desc) or re.search(r'\d{5,}', desc):
-            return 'Outros', 'Pessoa Física', 0.3
+            return 'Prioridade Financeira', 'Transferência a Pessoa', 0.7
         
-        # Estabelecimentos genéricos
-        if re.search(r'ltda|me$|eireli', desc):
+        # Estabelecimentos com CNPJ ou razão social genérica
+        if re.search(r'ltda|me$|eireli|comercio|serviços', desc):
             return 'Outros', 'Estabelecimento Genérico', 0.4
+        
+        # Nomes curtos sem padrão (ex: MK)
+        if len(desc) < 10:
+            return 'Outros', 'Não Classificado', 0.2
         
         return 'Outros', 'Não Classificado', 0.2
     
-    # ========== DEFINE L2 BASEADO NA MELHOR CATEGORIA ==========
+    # ========== DEFINE L2 ==========
     l2_mapping = {
         'Gastos Essenciais': 'Essenciais',
         'Estilo de Vida': 'Lazer/Consumo',
         'Prioridade Financeira': 'Serviços Financeiros',
         'Educação': 'Educação',
-        'Saúde': 'Saúde'
+        'Saúde': 'Saúde',
+        'Automóvel': 'Automóvel',
+        'Residência': 'Residência'
     }
     
     score_final = min(1, melhor_score / 5)
     return melhor_categoria, l2_mapping.get(melhor_categoria, 'Outros'), round(score_final, 2)
-
 
 # ========== APLICAÇÃO NO DATAFRAME gastos ==========
 print("Classificando gastos...")
@@ -236,14 +285,3 @@ print(gastos['categoria_macro'].value_counts())
 
 salva_arquivo_consolidado(df, FILE_PATH_OUTPUT, FILE_NAME)
 salva_arquivo_consolidado(gastos, FILE_PATH_OUTPUT, "finance_personal_report")
-
-# ========== SELEÇÃO DE COLUNAS ==========
-# colunas_desejadas = [
-#     'bank_id', 'account_type', 'creditDebitType', 'DESCRIPTION',
-#     'transactionAmount', 'partiePersonType', 'partieCnpjCpf', 'type',
-#     'categoria_macro', 'categoria_l2', 'score'
-# ]
-
-# gastos = gastos[
-#     [col for col in colunas_desejadas if col in gastos.columns]
-# ]
