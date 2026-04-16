@@ -35,6 +35,7 @@ def salva_multiplas_abas(abas_dict, file_path_output, file_name):
     except Exception as e:
         print(f"❌ Erro ao salvar: {e}")
 
+
 def ajuste_padrao_anomes(df, coluna: str):
     ''''
         Ajusta o padrão do ANOMES para MMYYYY
@@ -60,6 +61,7 @@ def gasto_total_mensal(df, value_discont, categorical, numerical):
         df.groupby(categorical)[numerical].transform('sum') + df[value_discont]
     )
     return df
+
 
 def gasto_total_consolidado(df):
     ''''
@@ -170,11 +172,38 @@ def borrowed_money_by_anomes(df):
 
     return notmy
 
-def group_macro_category(df):
+def group_categories(df, col_main, col_sub=None, value_name='VALUE'):
+    """
+    Agrupa gastos por ANOMES e categoria(s).
+    
+    Parâmetros:
+        - df: DataFrame
+        - col_main: coluna principal (ex: 'categoria_macro')
+        - col_sub: (opcional) coluna secundária (ex: 'categoria_l2')
+    
+    Retorna:
+        - DataFrame agrupado com soma de VALUE
+    """
+    if col_sub:
+        result = (
+            df
+                .groupby(
+                    ['ANOMES', 
+                     col_main, 
+                     col_sub
+                    ]
+                )['VALUE'].sum().reset_index()
+        )
+    else:
+        result = (
+            df
+                .groupby(
+                    ['ANOMES', 
+                     col_main
+                    ]
+                )['VALUE'].sum().reset_index()
+        )
 
-    result = (
-        df.groupby(['ANOMES', 'MACRO_CATEGORY'])['VALUE']
-        .sum()
-        .reset_index()
-    )
+    result = result.rename(columns={'VALUE': value_name})
+    
     return result

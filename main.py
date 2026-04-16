@@ -11,6 +11,7 @@ from util.util import (
     gasto_total_mensal,
     fillna_zero,
     borrowed_money_by_anomes,
+    group_categories,    
     salva_multiplas_abas
 )
 
@@ -287,6 +288,43 @@ print("\n✅ Classificação concluída!")
 print(f"Distribuição de categorias macro:")
 print(gastos['categoria_macro'].value_counts())
 
+print("\n")
+print("Visualizando dados da categoria e subcategoria ... ")
+macro_category = group_categories(gastos, 'categoria_macro')
+sub_category = group_categories(gastos, 'categoria_macro', 'categoria_l2')
+
+print(macro_category)
+
+print("\n")
+print("\n")
+
+print(sub_category)
+
+print("\n")
+
+# Agrupa por macro categoria e renomeia a coluna de soma
+macro_category = group_categories(gastos, 'categoria_macro')
+macro_category = macro_category.rename(columns={'VALUE': 'VALUE_MACRO_CATEGORY'})
+
+# Agrupa por macro + subcategoria e renomeia
+sub_category = group_categories(gastos, 'categoria_macro', 'categoria_l2')
+sub_category = sub_category.rename(columns={'VALUE': 'VALUE_SUB_CATEGORY'})
+
+gastos = gastos.merge(
+    macro_category,
+    on=["ANOMES", "categoria_macro"],
+    how="left"
+)
+
+gastos = gastos.merge(
+    sub_category,
+    on=["ANOMES", "categoria_macro", "categoria_l2"],
+    how="left"
+)
+
+print("\nTABELA CONSOLIDADA:")
+print(gastos)
+print("\n")
 
 abas = {
     "consolidado_por_mes": df,                    
