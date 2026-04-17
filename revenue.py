@@ -4,7 +4,6 @@ import re
 import os
 from pathlib import Path
 
-# Importa os dados da Gabriella do arquivo privado
 try:
     from data.holerites.gabriella.gabriella_privado import obter_dataframe_gabriella
     GABRIELLA_DISPONIVEL = True
