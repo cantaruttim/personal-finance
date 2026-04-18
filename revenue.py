@@ -140,7 +140,7 @@ def salvar_excel_com_abas(df_matheus, df_gabriella, arquivo_saida):
 # EXECUÇÃO PRINCIPAL
 # -------------------------------
 if __name__ == "__main__":
-    PASTA_MATHEUS = "./data/holerites/matheus/2026/"
+    PASTA_MATHEUS = "./data/holerites/matheus/"
     ARQUIVO_SAIDA = "./data/relatorio_holerites.xlsx"
     
     # Processa Matheus
