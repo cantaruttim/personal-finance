@@ -178,8 +178,8 @@ if __name__ == "__main__":
 # ======= ANÁLISES =======
 # ========================
 
-sheet_name = 'Consolidado'
-df = pd.read_excel(ARQUIVO_SAIDA, sheet_name=sheet_name)
+from config.config import SHEET_NAME
+df = pd.read_excel(ARQUIVO_SAIDA, sheet_name=SHEET_NAME)
 
 df = df[['pessoa', 'referencia', 'total_liquido']]
 print(df)
