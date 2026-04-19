@@ -4,6 +4,8 @@ import re
 from datetime import datetime
 from collections import Counter
 import os
+import glob
+from pathlib import Path
 
 # --------------------------
 # Função para salvar imagens
@@ -198,56 +200,75 @@ def analisar_e_preparar_abas(transacoes):
 # -------------------------------
 # 4. Execução principal
 # -------------------------------
-FILE_NAME = "./data/extratos/itau_extrato_012026.pdf"
+PASTA_EXTRATOS = "./data/extratos/"          
 OUTPUT_EXCEL_PATH = "./data/"
-OUTPUT_EXCEL_NAME = "analise_extrato_itau"
+OUTPUT_EXCEL_NAME = "analise_extratos_consolidado"
+EXTENSAO = "*.pdf"
+RECURSIVO = True  
 
 if __name__ == "__main__":
-    print(f"📄 Lendo arquivo: {FILE_NAME}")
-    try:
-        transacoes = extrair_transacoes(FILE_NAME)
-        if not transacoes:
-            print("❌ Nenhuma transação encontrada.")
-        else:
-            df, abas = analisar_e_preparar_abas(transacoes)
+    if RECURSIVO:
+        pattern = f"{PASTA_EXTRATOS}/**/{EXTENSAO}"
+        arquivos = glob.glob(pattern, recursive=True)
+    else:
+        pattern = f"{PASTA_EXTRATOS}/{EXTENSAO}"
+        arquivos = glob.glob(pattern, recursive=False)
+    
+    if not arquivos:
+        print(f"❌ Nenhum arquivo {EXTENSAO} encontrado em {PASTA_EXTRATOS}")
+        exit()
+    
+    print(f"📁 Encontrados {len(arquivos)} arquivo(s) para processar.")
+    
+    todas_transacoes = []
+    for arquivo in arquivos:
+        print(f"📄 Processando: {arquivo}")
+        try:
+            transacoes = extrair_transacoes(arquivo) 
+            if transacoes:
+                todas_transacoes.extend(transacoes)
+            else:
+                print(f"   ⚠️ Nenhuma transação extraída de {Path(arquivo).name}")
+        except Exception as e:
+            print(f"   ❌ Erro ao processar {Path(arquivo).name}: {e}")
+    
+    if not todas_transacoes:
+        print("❌ Nenhuma transação foi extraída de nenhum arquivo.")
+    else:
+        df_consolidado, abas = analisar_e_preparar_abas(todas_transacoes)
+        
+        salva_multiplas_abas(abas, OUTPUT_EXCEL_PATH, OUTPUT_EXCEL_NAME)
+        
+        try:
+            import matplotlib.pyplot as plt
             
-            # Salva Excel com múltiplas abas
-            salva_multiplas_abas(abas, OUTPUT_EXCEL_PATH, OUTPUT_EXCEL_NAME)
+            # Evolução do saldo (ordenado por data)
+            df_saldo = df_consolidado.dropna(subset=['saldo']).copy()
+            if not df_saldo.empty:
+                df_saldo = df_saldo.sort_values('data')
+                fig1, ax1 = plt.subplots(figsize=(12, 5))
+                ax1.plot(df_saldo['data'], df_saldo['saldo'], marker='o', linestyle='-', linewidth=1, markersize=3)
+                ax1.set_title('Evolução do Saldo da Conta (Consolidado)')
+                ax1.set_xlabel('Data')
+                ax1.set_ylabel('Saldo (R$)')
+                ax1.grid(True)
+                plt.xticks(rotation=45)
+                plt.tight_layout()
+                salvar_imagem(fig1, 'saldo_evolucao_consolidado.png')
+                plt.close(fig1)
             
-            # Geração de gráficos (opcional, usando a função salvar_imagem)
-            try:
-                import matplotlib.pyplot as plt
-                
-                # Evolução do saldo
-                df_saldo = df.dropna(subset=['saldo']).copy()
-                if not df_saldo.empty:
-                    fig1, ax1 = plt.subplots(figsize=(10, 4))
-                    ax1.plot(df_saldo['data'], df_saldo['saldo'], marker='o', linestyle='-')
-                    ax1.set_title('Evolução do Saldo da Conta')
-                    ax1.set_xlabel('Data')
-                    ax1.set_ylabel('Saldo (R$)')
-                    ax1.grid(True)
-                    plt.xticks(rotation=45)
-                    plt.tight_layout()
-                    salvar_imagem(fig1, 'saldo_evolucao.png')
-                    plt.close(fig1)
-                
-                # Top despesas por categoria
-                despesas_cat = df[df['valor'] < 0].groupby('categoria')['valor'].sum().abs().sort_values(ascending=False).head(5)
-                if not despesas_cat.empty:
-                    fig2, ax2 = plt.subplots(figsize=(8, 4))
-                    despesas_cat.plot(kind='bar', color='salmon', ax=ax2)
-                    ax2.set_title('Maiores Despesas por Categoria')
-                    ax2.set_ylabel('Valor (R$)')
-                    plt.xticks(rotation=45)
-                    plt.tight_layout()
-                    salvar_imagem(fig2, 'despesas_categoria.png')
-                    plt.close(fig2)
-                
-                print("📊 Gráficos salvos em './util/graficos/'")
-            except ImportError:
-                print("⚠️ Matplotlib não instalado. Gráficos não gerados.")
-    except FileNotFoundError:
-        print(f"❌ Arquivo '{FILE_NAME}' não encontrado.")
-    except Exception as e:
-        print(f"❌ Erro: {e}")
+            # Top despesas por categoria
+            despesas_cat = df_consolidado[df_consolidado['valor'] < 0].groupby('categoria')['valor'].sum().abs().sort_values(ascending=False).head(10)
+            if not despesas_cat.empty:
+                fig2, ax2 = plt.subplots(figsize=(10, 5))
+                despesas_cat.plot(kind='bar', color='salmon', ax=ax2)
+                ax2.set_title('Maiores Despesas por Categoria (Consolidado)')
+                ax2.set_ylabel('Valor (R$)')
+                plt.xticks(rotation=45, ha='right')
+                plt.tight_layout()
+                salvar_imagem(fig2, 'despesas_categoria_consolidado.png')
+                plt.close(fig2)
+            
+            print("📊 Gráficos consolidados salvos em './util/graficos/'")
+        except ImportError:
+            print("⚠️ Matplotlib não instalado. Gráficos não gerados.")

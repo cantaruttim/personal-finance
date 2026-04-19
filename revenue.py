@@ -212,3 +212,4 @@ else:
     pivot_df = pivot_df.drop('data', axis=1).set_index('referencia')
 
     print(pivot_df)
+    
