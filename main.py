@@ -1,51 +1,36 @@
 import pandas as pd
 import re
-from config.config import (
-    FILE_PATH, 
-    FILE_PATH_OUTPUT
-)
+from config.config import FILE_PATH, FILE_PATH_OUTPUT
 from util.util import (
-    ajuste_padrao_anomes, 
+    ajuste_padrao_anomes,
     gasto_total_consolidado,
     gasto_total_mensal,
     fillna_zero,
     borrowed_money_by_anomes,
-    group_categories,    
-    salva_multiplas_abas
+    group_categories,
+    salva_multiplas_abas,
+    inverter_sinal_transacoes,
+    substraction
 )
-
 
 gastos = pd.read_excel(FILE_PATH, sheet_name='gastos')
 gastos = ajuste_padrao_anomes(gastos, 'ANOMES')
+gastos = inverter_sinal_transacoes(gastos, substraction)
 
 print('\n')
 print("conferindo valor total mensal ... ")
 print(gastos.groupby('ANOMES')['VALUE'].sum())
 print('\n')
 
-notmy = borrowed_money_by_anomes(gastos)
+notmy = borrowed_money_by_anomes(gastos)  
 notmy = notmy[['ANOMES', 'BORROWED']]
-borrowed_grouped = (
-    notmy.groupby('ANOMES', as_index=False)['BORROWED'].sum()
-)
+borrowed_grouped = notmy.groupby('ANOMES', as_index=False)['BORROWED'].sum()
 
 print('\n')
-gastos = gastos.merge(
-    borrowed_grouped,
-    on='ANOMES',
-    how='left'
-)
-
+gastos = gastos.merge(borrowed_grouped, on='ANOMES', how='left')
 print('\n')
 
-gastos = (
-    gasto_total_mensal(
-        gastos, 
-        'BORROWED', 
-        'ANOMES', 
-        'VALUE'
-    )
-)
+gastos = gasto_total_mensal(gastos, 'BORROWED', 'ANOMES', 'VALUE')
 print("\n")
 print("Realizando tratamentos iniciais ...")
 df = fillna_zero(gasto_total_consolidado(gastos))
@@ -64,34 +49,19 @@ def clean_dataframe(df):
 
 gastos = clean_dataframe(gastos)
 
-
 def classificar_gasto_cartao(descricao):
-    """
-    
-        Pipeline que classifica gastos de cartão de crédito/débito baseado apenas na descrição.
-        Retorna: (categoria_macro, categoria_l2, score) para as descrições passadas pelo classificador
-    
-    """
+    """ Pipeline que classifica gastos de cartão de crédito/débito baseado apenas na descrição.
+        Retorna: (categoria_macro, categoria_l2, score) """
     desc = str(descricao).lower().strip()
-    
-    # ========== PRÉ-PROCESSAMENTO ==========
-    # Remove qualquer padrão de parcela/data do tipo "01/02", "02/02", etc.
     desc = re.sub(r'\d{2}/\d{2}', '', desc)
     desc = re.sub(r'\s+', ' ', desc)
     desc = desc.strip()
-    
-    # Remove prefixos comuns de gateway (mas preserva parte relevante)
     desc = re.sub(r'^(mp\*|asaas\*|zp\*|hna\*|pg\*|jim\.com\s*)', '', desc)
-    
-    # ========== CASOS DIRETOS PRIORITÁRIOS ==========
-    # (Organizados: primeiro específicos de categorias, depois transferências)
+
     casos_diretos = [
-        # --- CONDOMÍNIO ---
         (r'pgconta hubert imo', 'Residência', 'Condomínio', 1.0),
         (r'pgconta.*imo|condominio', 'Residência', 'Condomínio', 0.95),
         (r'bancobradescosa', 'Residência', 'Condomínio', 1.0),
-        
-        # --- ASSINATURAS E SERVIÇOS DIGITAIS ---
         (r'netflix|helphbomaxcom|spotify', 'Estilo de Vida', 'Assinaturas', 0.95),
         (r'google one|microsoft 365|microsoft|apple\.com|apple bill|applebill|applecombill|allsignature', 'Estilo de Vida', 'Assinaturas', 0.95),
         (r'ifood|ifd', 'Estilo de Vida', 'Alimentação', 0.95),
@@ -103,11 +73,7 @@ def classificar_gasto_cartao(descricao):
         (r'envio mens.automatica', 'Estilo de Vida', 'Serviços Financeiros', 0.95),
         (r'cod3rs', 'Estilo de Vida', 'Mentoria & Carreira', 0.95),
         (r'pg \*coders club', 'Estilo de Vida', 'Mentoria & Carreira', 0.95),
-        
-        # --- TRANSPORTE PÚBLICO ---
         (r'bilheteunicosaopaulo', 'Gastos Essenciais', 'Transporte Público', 0.95),
-        
-        # --- MERCADOS E ESSENCIAIS ---
         (r'assai|mercado|supermercado|mercadinho|jmhonestmarket|top ovos', 'Gastos Essenciais', 'Supermercado', 0.95),
         (r'drogasil|drogaria|farmacia|mendonca farma|drog|raia280|metro farma', 'Gastos Essenciais', 'Farmácia', 0.95),
         (r'posto|combust|auto posto|centroautomotivoe|auto p b 2 ltda|sol dourado auto servi', 'Gastos Essenciais', 'Combustível', 0.95),
@@ -115,32 +81,20 @@ def classificar_gasto_cartao(descricao):
         (r'estapar', 'Automóvel', 'Estacionamento', 0.95),
         (r'franciscobatistaa', 'Residência', 'Manutenção', 0.95),
         (r'marmitaria', 'Gastos Essenciais', 'Marmitas', 0.95),
-        
-        # --- COMPRAS ONLINE / MAGAZINES ---
         (r'amazon|amazon marketplace', 'Estilo de Vida', 'Compras Online', 0.9),
         (r'mercadolivre', 'Estilo de Vida', 'Compras Online', 0.9),
         (r'magazine luiza|magalu|mlp', 'Estilo de Vida', 'Compras Online', 0.9),
         (r'oboticario', 'Estilo de Vida', 'Beleza & Cosméticos & Roupas', 0.9),
         (r'lojas americanas', 'Estilo de Vida', 'Compras Online', 0.85),
         (r'chillibeans', 'Estilo de Vida', 'Compras', 0.85),
-        
-        # --- DOAÇÕES E IGREJAS ---
         (r'ass de deus min ipiran', 'Estilo de Vida', 'Doações', 0.85),
         (r'ipiranga', 'Estilo de Vida', 'Doações', 0.8),
-        
-        # --- RESTAURANTES E ALIMENTAÇÃO FORA ---
         (r'astor comercio de alime|outback|restaurante|pizzaria|burger|mc donalds|mcdonalds|63430674geovanna', 'Estilo de Vida', 'Alimentação', 0.9),
         (r'cafe|cafeteria|emporio amino|doces|37773965faiane|fini|brasil cacau|doceria contem amor|chocolandia|picole sabore mix|senhorita food truck|vivano steak|viena express shopping|tutti frutti|papa dominico mooca|big bread|santa monica paes', 'Estilo de Vida', 'Doces & Padaria', 0.85),
         (r'bocado gastronomia|fun funchal', 'Estilo de Vida', 'Alimentação', 0.85),
-        
-        # --- BELEZA E ESTÉTICA ---
         (r'd clinic estetica|almeida studio ha|barbearianovoesti|mp*ciadabeleza|makibella shop|decathlon', 'Estilo de Vida', 'Beleza & Cosméticos & Roupas', 0.9),
-        
-        # --- LAZER ---
         (r'cinemark|cinema', 'Estilo de Vida', 'Lazer', 0.85),
         (r'action park|rivera beachentennis ltd|century a park estacio|pierry park|deck ipiranga beach sp', 'Estilo de Vida', 'Saúde & Bem-Estar', 0.85),
-        
-        # --- SERVIÇOS FINANCEIROS / BOLETOS ---
         (r'conta vivo|recvivo|claro|fatura|pg\*', 'Prioridade Financeira', 'Contas', 0.95),
         (r'enel|energia|agua|copel', 'Prioridade Financeira', 'Contas', 0.95),
         (r'iof|juros|multa|encargos|anuidade diferenci', 'Prioridade Financeira', 'Serviços Financeiros', 1.0),
@@ -151,33 +105,22 @@ def classificar_gasto_cartao(descricao):
         (r'zp\*', 'Prioridade Financeira', 'Serviços Financeiros', 0.8),
         (r'mp\*', 'Prioridade Financeira', 'Pagamento Online', 0.85),
         (r'loteriasonline', 'Estilo de Vida', 'Lotérica', 0.95),
-        
-        # --- EDUCAÇÃO ---
         (r'anhanguera ed|adaicollege|dio|htm\*adai college', 'Educação', 'Mensalidade', 0.95),
         (r'ana?ju?h', 'Educação', 'Projeto Pessoal', 0.95),
-        
-        # --- SEGUROS ---
         (r'zurich|segur', 'Prioridade Financeira', 'Seguro', 0.9),
-        
-        # --- VIAGENS (aéreas) ---
         (r'gol linhas a\*gnef', 'Estilo de Vida', 'Viagens', 0.95),
-        
-        # --- UTILIDADES DOMÉSTICAS ---
         (r'siciliano utensili', 'Estilo de Vida', 'Utilidades Domésticas', 0.85),
         (r'pare azul', 'Automóvel', 'Estacionamento', 0.9),
-        
-        # --- TRANSFERÊNCIAS A PESSOAS (FALLBACK - apenas se nada acima casou) ---
         (r'jim\.com', 'Compras Gerais', 'Pagamentos Genéricos', 0.9),
         (r'[a-z]+\s+[a-z]+\s+[a-z]+', 'Compras Gerais', 'Pagamentos Genéricos', 0.7),
         (r'^[a-z]+\s+[a-z]+$', 'Compras Gerais', 'Pagamentos Genéricos', 0.65),
         (r'\d{5,}\.?\d*', 'Compras Gerais', 'Pagamentos Genéricos', 0.8),
     ]
-    
+
     for pattern, cat, l2, s in casos_diretos:
         if re.search(pattern, desc):
             return cat, l2, s
-    
-    # ========== REGRAS POR CATEGORIA COM PONTUAÇÃO ==========
+
     regras = {
         'Gastos Essenciais': {
             r'mercado|supermercado|mercadinho|assai|comercio de alimentos|mercearia': 3,
@@ -218,34 +161,25 @@ def classificar_gasto_cartao(descricao):
             r'reforma|construção': 2,
         }
     }
-    
+
     scores = {k: 0 for k in regras}
-    
     for categoria, patterns in regras.items():
         for pattern, peso in patterns.items():
             if re.search(pattern, desc):
                 scores[categoria] += peso
-    
+
     melhor_categoria = max(scores, key=scores.get)
     melhor_score = scores[melhor_categoria]
-    
-    # ========== FALLBACKS ==========
+
     if melhor_score == 0:
-        # Nomes próprios (pessoas físicas) - classifica como transferência
         if re.search(r'[A-Z][a-z]+\s+[A-Z][a-z]+', desc) or re.search(r'\d{5,}', desc):
             return 'Prioridade Financeira', 'Transferência a Pessoa', 0.7
-        
-        # Estabelecimentos com CNPJ ou razão social genérica
         if re.search(r'ltda|me$|eireli|comercio|serviços', desc):
             return 'Outros', 'Estabelecimento Genérico', 0.4
-        
-        # Nomes curtos sem padrão (ex: MK)
         if len(desc) < 10:
             return 'Outros', 'Não Classificado', 0.2
-        
         return 'Outros', 'Não Classificado', 0.2
-    
-    # ========== DEFINE L2 ==========
+
     l2_mapping = {
         'Gastos Essenciais': 'Gastos Essenciais',
         'Estilo de Vida': 'Lazer',
@@ -255,16 +189,12 @@ def classificar_gasto_cartao(descricao):
         'Automóvel': 'Automóvel',
         'Residência': 'Residência'
     }
-    
     score_final = min(1, melhor_score / 5)
     return melhor_categoria, l2_mapping.get(melhor_categoria, 'Outros'), round(score_final, 2)
 
-# ========== APLICAÇÃO NO DATAFRAME gastos ==========
+# ========== APLICAÇÃO DA CLASSIFICAÇÃO ==========
 print("Classificando gastos...")
-gastos[['categoria_macro', 'categoria_l2', 'score']] = (
-    gastos['DESCRIPTION']
-        .apply(lambda x: pd.Series(classificar_gasto_cartao(x)))
-)
+gastos[['categoria_macro', 'categoria_l2', 'score']] = gastos['DESCRIPTION'].apply(lambda x: pd.Series(classificar_gasto_cartao(x)))
 
 # ========== ANÁLISE DOS "OUTROS" ==========
 print("\n" + "="*60)
@@ -277,44 +207,28 @@ if len(outros) > 0:
 else:
     print("Nenhuma transação classificada como 'Outros'! 🎉")
 
-
 print("\n✅ Classificação concluída!")
 print(f"Distribuição de categorias macro:")
 print(gastos['categoria_macro'].value_counts())
 
 print("\n")
 print("Visualizando dados da categoria e subcategoria ... ")
+
 macro_category = group_categories(gastos, 'categoria_macro')
 sub_category = group_categories(gastos, 'categoria_macro', 'categoria_l2')
 
 print(macro_category)
-
 print("\n")
-print("\n")
-
 print(sub_category)
-
 print("\n")
 
-# Agrupa por macro categoria e renomeia a coluna de soma
-macro_category = group_categories(gastos, 'categoria_macro')
+# Renomeia colunas
 macro_category = macro_category.rename(columns={'VALUE': 'VALUE_MACRO_CATEGORY'})
-
-# Agrupa por macro + subcategoria e renomeia
-sub_category = group_categories(gastos, 'categoria_macro', 'categoria_l2')
 sub_category = sub_category.rename(columns={'VALUE': 'VALUE_SUB_CATEGORY'})
 
-gastos = gastos.merge(
-    macro_category,
-    on=["ANOMES", "categoria_macro"],
-    how="left"
-)
-
-gastos = gastos.merge(
-    sub_category,
-    on=["ANOMES", "categoria_macro", "categoria_l2"],
-    how="left"
-)
+# Mescla com o DataFrame original
+gastos = gastos.merge(macro_category, on=["ANOMES", "categoria_macro"], how="left")
+gastos = gastos.merge(sub_category, on=["ANOMES", "categoria_macro", "categoria_l2"], how="left")
 
 print("\nTABELA CONSOLIDADA:")
 print(gastos)
@@ -325,15 +239,7 @@ print("="*60)
 print("CATEGORIAS")
 print("="*60)
 
-categorias = gastos[
-    ['ANOMES', 
-     'categoria_macro',	
-     'categoria_l2',	
-     'VALUE_MACRO_CATEGORY',	
-     'VALUE_SUB_CATEGORY'
-    ]
-].drop_duplicates()
-
+categorias = gastos[['ANOMES', 'categoria_macro', 'categoria_l2', 'VALUE_MACRO_CATEGORY', 'VALUE_SUB_CATEGORY']].drop_duplicates()
 print(categorias)
 print("\n")
 
@@ -343,20 +249,14 @@ print("SALVANDO O ARQUIVO CONSOLIDADO")
 print("="*60)
 
 abas = {
-    "consolidado_por_mes": df,                    
-    "detalhamento_gastos": gastos,                
-    "resumo_emprestimos": borrowed_grouped,       
+    "consolidado_por_mes": df,
+    "detalhamento_gastos": gastos,
+    "resumo_emprestimos": borrowed_grouped,
     "sumarizacao_categorias": categorias
 }
 
-# Salva tudo em um único arquivo
 try:
-    (
-        salva_multiplas_abas(
-            abas, 
-            FILE_PATH_OUTPUT, 
-            "relatorio_financeiro_completo"
-        )
-    )
+    salva_multiplas_abas(abas, FILE_PATH_OUTPUT, "relatorio_financeiro_completo")
+    print("✅ Arquivo salvo com sucesso!")
 except Exception as e:
     print(f"❌ Error: {e}")

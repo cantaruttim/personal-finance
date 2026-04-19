@@ -1,8 +1,7 @@
 ## ANÁLISE DAS CATEGORIAS
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
+import numpy as np
+import pandas as pd
 
 categorias = pd.read_excel('./data/relatorio_financeiro_completo.xlsx', sheet_name='sumarizacao_categorias')
 print("\n")
@@ -11,16 +10,17 @@ print("DADOS")
 print("="*60)
 print(categorias)
 
+def salvar_imagem(fig, nome_arquivo, caminho="./util/graficos/", dpi=300, bbox_inches='tight'):
+    import os
 
-import matplotlib.pyplot as plt
-import matplotlib.colors as mcolors
-import numpy as np
-import pandas as pd
+    os.makedirs(caminho, exist_ok=True)
+    
+    caminho_completo = os.path.join(caminho, nome_arquivo)
+    print(f"Salvando imagem: {caminho_completo}")
+    
+    fig.savefig(caminho_completo, dpi=dpi, bbox_inches=bbox_inches)
+    print("✅ Imagem salva com sucesso!")
 
-
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
 
 def plot_top_subcategorias_matplotlib(df, categoria_macro, top_n=5, figsize=(12, 6)):
     """
@@ -46,8 +46,16 @@ def plot_top_subcategorias_matplotlib(df, categoria_macro, top_n=5, figsize=(12,
     df_top = df_macro[df_macro['categoria_l2'].isin(top_subcats)]
 
     # Pivot
-    pivot = df_top.pivot_table(index='data_ord', columns='categoria_l2', values='VALUE_SUB_CATEGORY',
-                               aggfunc='sum', fill_value=0)
+    pivot = (
+        df_top
+            .pivot_table(
+                index='data_ord', 
+                columns='categoria_l2', 
+                values='VALUE_SUB_CATEGORY',
+                aggfunc='sum', 
+                fill_value=0
+            )
+    )
     pivot = pivot.reindex(meses_ordenados)
 
     # Ordenar colunas por valor total decrescente
@@ -59,7 +67,6 @@ def plot_top_subcategorias_matplotlib(df, categoria_macro, top_n=5, figsize=(12,
     subcats = pivot.columns
     n_subcats = len(subcats)
 
-    # Paleta 'tab10' (cores de alto contraste)
     cmap = plt.get_cmap('tab10')
     cores = [cmap(i % 10) for i in range(n_subcats)]
 
@@ -83,7 +90,6 @@ def plot_top_subcategorias_matplotlib(df, categoria_macro, top_n=5, figsize=(12,
         bottoms += valores[:, i]
 
     ax.set_title(f'Despesas por subcategoria - {categoria_macro} (Top {top_n})', fontsize=14)
-    ax.set_xlabel('Mês/Ano', fontsize=12)
     ax.set_ylabel('Valor (R$)', fontsize=12)
     ax.legend(title='Subcategoria', bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.xticks(rotation=45, ha='right')
@@ -98,7 +104,8 @@ def plot_top_subcategorias_matplotlib(df, categoria_macro, top_n=5, figsize=(12,
         perc = val / total_por_subcat.sum() * 100
         print(f"   {sub}: R$ {val:,.2f} ({perc:.1f}%)")
     print("="*60 + "\n")
-
+    
+    salvar_imagem(fig, 'categoria_subcat.png')
     plt.show()
     return fig
 
