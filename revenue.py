@@ -3,6 +3,7 @@ import pandas as pd
 import re
 import os
 from pathlib import Path
+from config.config import SHEET_NAME
 
 try:
     from data.holerites.gabriella.gabriella_privado import obter_dataframe_gabriella
@@ -126,16 +127,27 @@ def salvar_excel_com_abas(df_matheus, df_gabriella, arquivo_saida):
         # Aba 3: Consolidado (junção das duas pessoas)
         df_consolidado = pd.concat([df_matheus, df_gabriella], ignore_index=True)
         if not df_consolidado.empty:
-            # Remove colunas totalmente nulas
             df_consolidado = df_consolidado.dropna(axis=1, how='all')
             df_consolidado.to_excel(writer, sheet_name='Consolidado', index=False)
             
-            # Aba 4: Pivot mensal (valores por pessoa e mês)
-            pivot = df_consolidado.pivot_table(index='referencia', columns='pessoa', values='total_liquido', aggfunc='sum')
-            pivot.to_excel(writer, sheet_name='Pivot_mensal')
+            # Aba 4: Pivot mensal com ordenação cronológica decrescente e total por mês
+            pivot_df = df_consolidado.pivot_table(index='referencia', 
+                                                  columns='pessoa', 
+                                                  values='total_liquido', 
+                                                  aggfunc='sum')
+            # Adiciona coluna de total por mês
+            pivot_df['Total por mês'] = pivot_df.sum(axis=1)
+            
+            # Ordenar por data real (decrescente)
+            pivot_df = pivot_df.reset_index()
+            pivot_df['data'] = pd.to_datetime(pivot_df['referencia'], format='%m/%Y')
+            pivot_df = pivot_df.sort_values('data', ascending=False)
+            pivot_df = pivot_df.drop('data', axis=1).set_index('referencia')
+            
+            pivot_df.to_excel(writer, sheet_name='Pivot_mensal')
     
     print(f"✅ Relatório salvo em {arquivo_saida}")
-
+    
 # -------------------------------
 # EXECUÇÃO PRINCIPAL
 # -------------------------------
@@ -178,8 +190,25 @@ if __name__ == "__main__":
 # ======= ANÁLISES =======
 # ========================
 
-from config.config import SHEET_NAME
 df = pd.read_excel(ARQUIVO_SAIDA, sheet_name=SHEET_NAME)
 
-df = df[['pessoa', 'referencia', 'total_liquido']]
-print(df)
+if 'pessoa' not in df.columns or 'referencia' not in df.columns or 'total_liquido' not in df.columns:
+    print("⚠️ As colunas necessárias não foram encontradas na aba selecionada.")
+else:
+    df = df[['pessoa', 'referencia', 'total_liquido']]
+
+    pivot_df = df.pivot_table(index='referencia', 
+                              columns='pessoa', 
+                              values='total_liquido', 
+                              aggfunc='sum')
+
+    pivot_df = pivot_df.fillna(0)
+
+    pivot_df['Total por mês'] = pivot_df.sum(axis=1)
+
+    pivot_df = pivot_df.reset_index()
+    pivot_df['data'] = pd.to_datetime(pivot_df['referencia'], format='%m/%Y')
+    pivot_df = pivot_df.sort_values('data', ascending=False)
+    pivot_df = pivot_df.drop('data', axis=1).set_index('referencia')
+
+    print(pivot_df)
