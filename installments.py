@@ -20,5 +20,14 @@ over = install[ install['STATUS'] == "Over" ]
 paying['TOTAL'] = paying.groupby('ANOMES')['VALUE'].transform('sum')
 over['TOTAL'] = over.groupby('ANOMES')['VALUE'].transform('sum')
 
+print("="*60)
+print("OVER")
+print("="*60)
 print(over)
+
+print("\n")
+## Precisa de ajuste para pegar apenas os dados da última partição
+print("="*60)
+print("PAYING")
+print("="*60)
 print(paying)
