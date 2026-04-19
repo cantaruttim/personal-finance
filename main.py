@@ -56,7 +56,8 @@ def classificar_gasto_cartao(descricao):
     desc = re.sub(r'\d{2}/\d{2}', '', desc)
     desc = re.sub(r'\s+', ' ', desc)
     desc = desc.strip()
-    desc = re.sub(r'^(mp\*|asaas\*|zp\*|hna\*|pg\*|jim\.com\s*)', '', desc)
+    desc = re.sub(r'^(|asaas\*|zp\*|hna\*|pg\*|jim\.com\s*)', '', desc)
+    # mp\*
 
     casos_diretos = [
         (r'pgconta hubert imo', 'Residência', 'Condomínio', 1.0),
@@ -68,8 +69,10 @@ def classificar_gasto_cartao(descricao):
         (r'99food', 'Estilo de Vida', 'Alimentação', 0.95),
         (r'uber.*trip|uber\*', 'Estilo de Vida', 'Mobilidade', 0.95),
         (r'99\*', 'Estilo de Vida', 'Mobilidade', 0.9),
-        (r'totalpass|gympass|wellhub|nazareias|sports', 'Estilo de Vida', 'Saúde & Bem-Estar', 0.95),
-        (r'azul linhas aereas bras|accor|mino|melimais|livelo|ig\*', 'Estilo de Vida', 'Pontos & Viagens', 0.95),
+        (r'totalpass|gympass|wellhub|nazareias|sports|510535010001', 'Estilo de Vida', 'Saúde & Bem-Estar', 0.95),
+        (r'azul linhas aereas bras|accor|melimais|livelo|ig\*', 'Estilo de Vida', 'Pontos & Viagens', 0.95),
+        (r'mp\*mino', 'Estilo de Vida', 'Pontos & Viagens', 0.95),         
+        (r'emporio\s*amino', 'Estilo de Vida', 'Alimentação', 0.95),
         (r'envio mens.automatica', 'Estilo de Vida', 'Serviços Financeiros', 0.95),
         (r'cod3rs', 'Estilo de Vida', 'Mentoria & Carreira', 0.95),
         (r'pg \*coders club', 'Estilo de Vida', 'Mentoria & Carreira', 0.95),
@@ -90,7 +93,7 @@ def classificar_gasto_cartao(descricao):
         (r'ass de deus min ipiran', 'Estilo de Vida', 'Doações', 0.85),
         (r'ipiranga', 'Estilo de Vida', 'Doações', 0.8),
         (r'astor comercio de alime|outback|restaurante|pizzaria|burger|mc donalds|mcdonalds|63430674geovanna', 'Estilo de Vida', 'Alimentação', 0.9),
-        (r'cafe|cafeteria|emporio amino|doces|37773965faiane|fini|brasil cacau|doceria contem amor|chocolandia|picole sabore mix|senhorita food truck|vivano steak|viena express shopping|tutti frutti|papa dominico mooca|big bread|santa monica paes', 'Estilo de Vida', 'Doces & Padaria', 0.85),
+        (r'cafe|cafeteria|doces|37773965faiane|fini|brasil cacau|doceria contem amor|chocolandia|picole sabore mix|senhorita food truck|vivano steak|viena express shopping|tutti frutti|papa dominico mooca|big bread|santa monica paes', 'Estilo de Vida', 'Doces & Padaria', 0.85),
         (r'bocado gastronomia|fun funchal', 'Estilo de Vida', 'Alimentação', 0.85),
         (r'd clinic estetica|almeida studio ha|barbearianovoesti|mp*ciadabeleza|makibella shop|decathlon', 'Estilo de Vida', 'Beleza & Cosméticos & Roupas', 0.9),
         (r'cinemark|cinema', 'Estilo de Vida', 'Lazer', 0.85),
@@ -195,6 +198,13 @@ def classificar_gasto_cartao(descricao):
 # ========== APLICAÇÃO DA CLASSIFICAÇÃO ==========
 print("Classificando gastos...")
 gastos[['categoria_macro', 'categoria_l2', 'score']] = gastos['DESCRIPTION'].apply(lambda x: pd.Series(classificar_gasto_cartao(x)))
+
+print("\n")
+print("TRANSAÇÕES COM BAIXA CONFIANÇA")
+# Mostrar classificações com baixa confiança
+baixa_confianca = gastos[gastos['score'] < 0.6]
+print(f"Transações com score < 0.6: {len(baixa_confianca)}")
+print(baixa_confianca[['DESCRIPTION', 'categoria_macro', 'categoria_l2', 'score']])
 
 # ========== ANÁLISE DOS "OUTROS" ==========
 print("\n" + "="*60)

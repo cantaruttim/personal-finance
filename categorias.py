@@ -84,9 +84,20 @@ def plot_top_subcategorias_matplotlib(df, categoria_macro, top_n=5, figsize=(12,
                 y_pos = bottoms[j] + valor / 2
                 texto = f'R$ {valor:,.2f}\n({proporcao:.0f}%)'
                 # Fundo preto semitransparente para contraste
-                ax.text(j, y_pos, texto, ha='center', va='center', fontsize=7,
-                        color='white', weight='bold',
-                        bbox=dict(boxstyle='round,pad=0.2', facecolor='black', alpha=0.6))
+                ax.text(j, 
+                        y_pos, 
+                        texto, 
+                        ha='center', 
+                        va='center', 
+                        fontsize=7,
+                        color='white', 
+                        weight='bold',
+                        bbox=dict(
+                            boxstyle='round,pad=0.2', 
+                            facecolor='gray', 
+                            alpha=0.6
+                        )
+                )
         bottoms += valores[:, i]
 
     ax.set_title(f'Despesas por subcategoria - {categoria_macro} (Top {top_n})', fontsize=14)
@@ -104,7 +115,7 @@ def plot_top_subcategorias_matplotlib(df, categoria_macro, top_n=5, figsize=(12,
         perc = val / total_por_subcat.sum() * 100
         print(f"   {sub}: R$ {val:,.2f} ({perc:.1f}%)")
     print("="*60 + "\n")
-    
+
     salvar_imagem(fig, 'categoria_subcat.png')
     plt.show()
     return fig
