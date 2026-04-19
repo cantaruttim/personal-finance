@@ -172,3 +172,14 @@ if __name__ == "__main__":
     
     # Salva Excel com abas separadas
     salvar_excel_com_abas(df_matheus, df_gabriella, ARQUIVO_SAIDA)
+
+
+# ========================
+# ======= ANÁLISES =======
+# ========================
+
+sheet_name = 'Consolidado'
+df = pd.read_excel(ARQUIVO_SAIDA, sheet_name=sheet_name)
+
+df = df[['pessoa', 'referencia', 'total_liquido']]
+print(df)
