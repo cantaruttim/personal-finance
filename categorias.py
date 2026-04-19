@@ -11,10 +11,21 @@ print("DADOS")
 print("="*60)
 print(categorias)
 
+
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+import numpy as np
+import pandas as pd
+
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
 def plot_top_subcategorias_matplotlib(df, categoria_macro, top_n=5, figsize=(12, 6)):
     """
-    Plota um gráfico de barras empilhadas com as top N subcategorias de uma macro categoria.
-    Utiliza uma paleta de tons pastéis mais fortes (saturação 0.65, valor 0.9).
+    Plota um gráfico de barras empilhadas com as top N subcategorias.
+    Utiliza paleta 'tab10' e texto com fundo preto semitransparente para máxima legibilidade.
     """
     # Filtra pela macro
     df_macro = df[df['categoria_macro'] == categoria_macro].copy()
@@ -31,64 +42,57 @@ def plot_top_subcategorias_matplotlib(df, categoria_macro, top_n=5, figsize=(12,
     total_por_sub = df_macro.groupby('categoria_l2')['VALUE_SUB_CATEGORY'].sum().sort_values(ascending=False)
     top_subcats = total_por_sub.head(top_n).index.tolist()
 
-    # Filtra top subcategorias
-    df_top = df_macro[df_macro['categoria_l2'].isin(top_subcats)].copy()
-
-    # Agrupa outras em "Outros"
-    outras = df_macro[~df_macro['categoria_l2'].isin(top_subcats)]
-    if not outras.empty:
-        outras_agg = outras.groupby('data_ord')['VALUE_SUB_CATEGORY'].sum().reset_index()
-        outras_agg['categoria_l2'] = 'Outros'
-        df_top = pd.concat([df_top, outras_agg], ignore_index=True)
+    # Filtra apenas as top subcategorias
+    df_top = df_macro[df_macro['categoria_l2'].isin(top_subcats)]
 
     # Pivot
     pivot = df_top.pivot_table(index='data_ord', columns='categoria_l2', values='VALUE_SUB_CATEGORY',
                                aggfunc='sum', fill_value=0)
     pivot = pivot.reindex(meses_ordenados)
 
-    # Ordenar colunas
+    # Ordenar colunas por valor total decrescente
     col_order = [c for c in total_por_sub.index if c in pivot.columns]
-    if 'Outros' in pivot.columns:
-        col_order = [c for c in col_order if c != 'Outros'] + ['Outros']
     pivot = pivot[col_order]
 
-    valores = pivot.values  # shape (n_meses, n_subcats)
+    valores = pivot.values
     totais_mensais = valores.sum(axis=1)
     subcats = pivot.columns
     n_subcats = len(subcats)
 
-    # Gerar cores pastéis fortes usando HSV com saturação e valor fixos
-    hues = np.linspace(0, 1, n_subcats, endpoint=False)
-    cores = []
-    for h in hues:
-        # Converter HSV (h, s=0.65, v=0.9) para RGB
-        rgb = mcolors.hsv_to_rgb([h, 0.65, 0.9])
-        cores.append(rgb)
+    # Paleta 'tab10' (cores de alto contraste)
+    cmap = plt.get_cmap('tab10')
+    cores = [cmap(i % 10) for i in range(n_subcats)]
 
     # Plot
     fig, ax = plt.subplots(figsize=figsize)
     bottoms = np.zeros(len(meses_ordenados))
+
     for i, (sub, cor) in enumerate(zip(subcats, cores)):
-        ax.bar(meses_labels, valores[:, i], bottom=bottoms, label=sub, color=cor, alpha=0.9)
-        # Anotações de proporção mensal
+        ax.bar(meses_labels, valores[:, i], bottom=bottoms, label=sub, color=cor,
+               alpha=0.85, edgecolor='black', linewidth=0.5)
+        # Anotações com valor e porcentagem
         for j, (valor, total_mes) in enumerate(zip(valores[:, i], totais_mensais)):
             if valor > 0:
                 proporcao = valor / total_mes * 100
                 y_pos = bottoms[j] + valor / 2
-                ax.text(j, y_pos, f'{proporcao:.0f}%', ha='center', va='center', fontsize=8, color='white', weight='bold')
+                texto = f'R$ {valor:,.2f}\n({proporcao:.0f}%)'
+                # Fundo preto semitransparente para contraste
+                ax.text(j, y_pos, texto, ha='center', va='center', fontsize=7,
+                        color='white', weight='bold',
+                        bbox=dict(boxstyle='round,pad=0.2', facecolor='black', alpha=0.6))
         bottoms += valores[:, i]
 
-    ax.set_title(f'Despesas por subcategoria - {categoria_macro} (Top {top_n} + Outros)', fontsize=14)
+    ax.set_title(f'Despesas por subcategoria - {categoria_macro} (Top {top_n})', fontsize=14)
     ax.set_xlabel('Mês/Ano', fontsize=12)
     ax.set_ylabel('Valor (R$)', fontsize=12)
     ax.legend(title='Subcategoria', bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
 
-    # Proporções totais
+    # Proporções totais (console)
     total_por_subcat = valores.sum(axis=0)
     print("\n" + "="*60)
-    print(f"📊 Proporção total de cada subcategoria em '{categoria_macro}' (soma de todos os meses):")
+    print(f"📊 Proporção total das top {top_n} subcategorias em '{categoria_macro}':")
     print("="*60)
     for sub, val in zip(subcats, total_por_subcat):
         perc = val / total_por_subcat.sum() * 100
