@@ -32,7 +32,7 @@ resumo_mes = pd.DataFrame({
     'ANOMES': [paying['ANOMES'].iloc[0]],
     'TOTAL_PAYING': [paying[paying['VALUE'] > 0]['VALUE'].sum()],
     'TOTAL_OVER': [over[over['VALUE'] > 0]['VALUE'].sum()],
-    'TOTAL_GERAL': [paying[paying['VALUE'] > 0]['VALUE'].sum() + over[over['VALUE'] > 0]['VALUE'].sum()]
+    'TOTAL_GERAL': [paying[paying['VALUE'] > 0]['VALUE'].sum() - over[over['VALUE'] > 0]['VALUE'].sum()]
 })
 
 print("="*60)
