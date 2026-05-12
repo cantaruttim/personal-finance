@@ -11,6 +11,9 @@ install = pd.read_excel('./data/finance_report.xlsx' , 'parcelados')
 install = ajuste_padrao_anomes(install, 'ANOMES')
 install = filtrar_mes_mais_recente(install, coluna_anomes='ANOMES')
 install = inverter_sinal_transacoes(install, substraction)
+install['PARC_ATUAL'] = install['PARC_ATUAL'].astype(int)
+install['ULTI_PARC'] = install['ULTI_PARC'].astype(int)
+install['VALUE'] = install['VALUE'].astype(float)
 
 install['STATUS'] = np.where(
     (install['PARC_ATUAL'] < install['ULTI_PARC']) |
@@ -22,11 +25,15 @@ install['STATUS'] = np.where(
 paying = install[ install['STATUS'] == "Paying" ]
 over = install[ install['STATUS'] == "Over" ]
 
-paying['TOTAL'] = paying.groupby('ANOMES')['VALUE'].transform('sum')
-over['TOTAL'] = over.groupby('ANOMES')['VALUE'].transform('sum')
-
 paying = filtrar_mes_mais_recente(paying, coluna_anomes='ANOMES')
 over = filtrar_mes_mais_recente(over, coluna_anomes='ANOMES')
+
+resumo_mes = pd.DataFrame({
+    'ANOMES': [paying['ANOMES'].iloc[0]],
+    'TOTAL_PAYING': [paying[paying['VALUE'] > 0]['VALUE'].sum()],
+    'TOTAL_OVER': [over[over['VALUE'] > 0]['VALUE'].sum()],
+    'TOTAL_GERAL': [paying[paying['VALUE'] > 0]['VALUE'].sum() + over[over['VALUE'] > 0]['VALUE'].sum()]
+})
 
 print("="*60)
 print("OVER")
@@ -38,3 +45,10 @@ print("="*60)
 print("PAYING")
 print("="*60)
 print(paying)
+
+
+print("\n")
+print("="*60)
+print("RESUMO MENSAL")
+print("="*60)
+print(resumo_mes)
