@@ -2,11 +2,15 @@ import pandas as pd
 import numpy as np
 from util.util import (
     ajuste_padrao_anomes,
-    filtrar_mes_mais_recente
+    filtrar_mes_mais_recente,
+    inverter_sinal_transacoes,
+    substraction
 )
 
 install = pd.read_excel('./data/finance_report.xlsx' , 'parcelados')
 install = ajuste_padrao_anomes(install, 'ANOMES')
+install = filtrar_mes_mais_recente(install, coluna_anomes='ANOMES')
+install = inverter_sinal_transacoes(install, substraction)
 
 install['STATUS'] = np.where(
     (install['PARC_ATUAL'] < install['ULTI_PARC']) |
