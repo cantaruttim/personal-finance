@@ -4,6 +4,15 @@ from util.util import (
     ajuste_padrao_anomes
 )
 
+def retornando_ultima_fatura(df):
+    from datetime import datetime
+    ano = str(datetime.today().year)
+    mes = str(datetime.today().month - 1)
+    mes = '0' + mes
+    anomes = str(mes + ano)
+    
+    return df[df['ANOMES'] == anomes]
+
 install = pd.read_excel('./data/finance_report.xlsx' , 'parcelados')
 install = ajuste_padrao_anomes(install, 'ANOMES')
 
@@ -20,13 +29,15 @@ over = install[ install['STATUS'] == "Over" ]
 paying['TOTAL'] = paying.groupby('ANOMES')['VALUE'].transform('sum')
 over['TOTAL'] = over.groupby('ANOMES')['VALUE'].transform('sum')
 
+paying = retornando_ultima_fatura(paying)
+over = retornando_ultima_fatura(over)
+
 print("="*60)
 print("OVER")
 print("="*60)
 print(over)
 
 print("\n")
-## Precisa de ajuste para pegar apenas os dados da última partição
 print("="*60)
 print("PAYING")
 print("="*60)
