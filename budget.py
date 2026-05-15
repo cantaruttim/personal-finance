@@ -1,6 +1,7 @@
 import pandas as pd
 from util.util import ajuste_padrao_anomes, filtrar_mes_mais_recente
 
+# MELHORAR ESSA CLASSIFICAÇÃO DO ORÇAMENTO.
 PERC_ORCAMENTO_ESTILO_VIDA = 0.2
 PERC_ORCAMENTO_PRIORIDADE_FINANCEIRA = 0.4
 PERC_ORCAMENTO_GASTOS_ESSENCIAIS = 0.15
@@ -37,11 +38,11 @@ budget = (
 )
 budget['Total_Mês'] = holerite['Total por mês'][0]
 
-budget['VL_PERC_ORCAMENTO_ESTILO_VIDA'] = round(budget['Total_Mês'] * PERC_ORCAMENTO_ESTILO_VIDA, 4)
-budget['VL_PERC_ORCAMENTO_PRIORIDADE_FINANCEIRA'] = round(budget['Total_Mês'] * PERC_ORCAMENTO_PRIORIDADE_FINANCEIRA, 4)
-budget['VL_PERC_ORCAMENTO_GASTOS_ESSENCIAIS'] = round(budget['Total_Mês'] * PERC_ORCAMENTO_GASTOS_ESSENCIAIS, 4)
-budget['VL_PERC_ORCAMENTO_INVESTIMENTOS'] = round(budget['Total_Mês'] * PERC_ORCAMENTO_INVESTIMENTOS, 4)
-budget['VL_PERC_OUTROS'] = round(budget['Total_Mês'] * PERC_OUTROS, 4)
+budget['VL_PERC_ORCAMENTO_ESTILO_VIDA'] = round(budget['Total_Mês'] * PERC_ORCAMENTO_ESTILO_VIDA, 2)
+budget['VL_PERC_ORCAMENTO_PRIORIDADE_FINANCEIRA'] = round(budget['Total_Mês'] * PERC_ORCAMENTO_PRIORIDADE_FINANCEIRA, 2)
+budget['VL_PERC_ORCAMENTO_GASTOS_ESSENCIAIS'] = round(budget['Total_Mês'] * PERC_ORCAMENTO_GASTOS_ESSENCIAIS, 2)
+budget['VL_PERC_ORCAMENTO_INVESTIMENTOS'] = round(budget['Total_Mês'] * PERC_ORCAMENTO_INVESTIMENTOS, 2)
+budget['VL_PERC_OUTROS'] = round(budget['Total_Mês'] * PERC_OUTROS, 2)
 
 
 print(budget)
