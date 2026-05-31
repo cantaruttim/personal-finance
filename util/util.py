@@ -1,3 +1,5 @@
+from datetime import datetime
+from matplotlib.dates import relativedelta
 import pandas as pd
 
 substraction = [
@@ -77,6 +79,21 @@ def select_columns(df, columns: list):
 # ========================
 # FUNÇÕES PARA PARCELADOS
 # ========================
+
+def mes_para_datetime(anomes: str) -> datetime:
+    """Converte 'MMYYYY' para datetime (primeiro dia do mês)."""
+    try:
+        mes = int(anomes[:2])
+        ano = int(anomes[2:])
+        return datetime(ano, mes, 1)
+    except Exception as e:
+        print(f"Erro ao converter {anomes}: {e}")
+        return datetime(1900, 1, 1)
+
+def calcular_termino(data_atual: datetime, meses_restantes: int) -> datetime:
+    """Adiciona meses à data atual."""
+    return data_atual + relativedelta(months=meses_restantes)
+
 
 def filtrar_mes_mais_recente(df, coluna_anomes='ANOMES'):
     """
