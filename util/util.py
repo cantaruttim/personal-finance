@@ -86,17 +86,13 @@ def filtrar_mes_mais_recente(df, coluna_anomes='ANOMES'):
     data_max = datas.max()
     return df[datas == data_max].copy()
 
-def comprometimento_fatura_proximo_mes(df):
-    """
-    Calcula o valor da próxima fatura baseado no valor das parcelas já comprometidas.
-    """
-    mask = df['PAID'] <= df['TOTAL']
-    df['COMPROMETIDO'] = df['VALUE'].where(mask, 0).cumsum()
-    return df
-
-def retorna_valor_emprestado(df):
-    """Calcula o valor total emprestado com base na MACRO_CATEGORY."""
-    return df[df['MACRO_CATEGORY'] == 'EMPRÉSTIMOS']['VALUE'].sum()
+# def comprometimento_fatura_proximo_mes(df):
+#     """
+#     Calcula o valor da próxima fatura baseado no valor das parcelas já comprometidas.
+#     """
+#     mask = df['PAID'] <= df['TOTAL']
+#     df['COMPROMETIDO'] = df['VALUE'].where(mask, 0).cumsum()
+#     return df
 
 def atualizar_comprometido_liquido(df, empr, coluna='COMPROMETIDO'):
     """

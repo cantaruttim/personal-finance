@@ -3,6 +3,7 @@ import numpy as np
 from util.util import (
     ajuste_padrao_anomes,
     filtrar_mes_mais_recente,
+    comprometimento_fatura_proximo_mes,
     inverter_sinal_transacoes,
     substraction
 )
@@ -27,6 +28,8 @@ over = install[ install['STATUS'] == "Over" ]
 
 paying = filtrar_mes_mais_recente(paying, coluna_anomes='ANOMES')
 over = filtrar_mes_mais_recente(over, coluna_anomes='ANOMES')
+
+# paying = comprometimento_fatura_proximo_mes(paying)
 
 resumo_mes = pd.DataFrame({
     'ANOMES': [paying['ANOMES'].iloc[0]],
