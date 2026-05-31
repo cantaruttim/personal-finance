@@ -97,10 +97,15 @@ if not df_paying.empty:
     print("\n" + "=" * 100)
     print("RESUMO POR PESSOA (OWNER)")
     print("=" * 100)
-    resumo_owner = df_paying.groupby('OWNER').agg(
-        Total_Gasto_Futuro=('GASTO_FUTURO', 'sum'),
-        Quantidade_Compras=('DESCRIPTION', 'count')
-    ).reset_index()
+    resumo_owner = (
+        df_paying
+            .groupby('OWNER')
+            .agg(
+                Total_Gasto_Futuro=('GASTO_FUTURO', 'sum'),
+                Quantidade_Compras=('DESCRIPTION', 'count')
+            )
+            .reset_index()
+    )
     resumo_owner['Total_Gasto_Futuro'] = resumo_owner['Total_Gasto_Futuro'].apply(lambda x: f'R$ {x:.2f}')
     print(resumo_owner.to_string(index=False))
 
@@ -124,18 +129,23 @@ for idx, row in paying_commitment.iterrows():
     # Gera cada mês
     for i in range(num_parcelas_restantes):
         mes_pagamento = data_base + relativedelta(months=i)
-        projecao_mensal.append({
-            'MES_REFERENCIA': mes_pagamento,
-            'VALOR_PARCELA': valor_parcela,
-            'DESCRIPTION': row['DESCRIPTION'],  # opcional: para debug
-            'OWNER': row['OWNER']
-        })
+        projecao_mensal.append(
+            {
+                'MES_REFERENCIA': mes_pagamento,
+                'VALOR_PARCELA': valor_parcela,
+                'DESCRIPTION': row['DESCRIPTION'], 
+                'OWNER': row['OWNER']
+            }
+        )
 
 # Converte para DataFrame
 df_mensal = pd.DataFrame(projecao_mensal)
 
 # Agrupa por mês e soma os valores
-df_gasto_mensal = df_mensal.groupby('MES_REFERENCIA')['VALOR_PARCELA'].sum().reset_index()
+df_gasto_mensal = (
+    df_mensal
+        .groupby('MES_REFERENCIA')['VALOR_PARCELA'].sum().reset_index()
+    )
 df_gasto_mensal = df_gasto_mensal.sort_values('MES_REFERENCIA')
 
 # Formata a coluna de mês para string legível
