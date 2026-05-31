@@ -1,5 +1,4 @@
 import pandas as pd
-import re
 from config.config import FILE_PATH, FILE_PATH_OUTPUT
 from util.util import (
     ajuste_padrao_anomes,
