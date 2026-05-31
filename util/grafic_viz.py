@@ -10,37 +10,37 @@ def prepare_macro_data(df):
     Retorna um DataFrame pivotado com meses nas linhas e categorias nas colunas.
     """
     grouped = (
-        df.groupby(['ANOMES', 'categoria_macro'])['VALUE']
+        df.groupby(['ANOMES', 'CD_CATEGORY'])['VALUE']
         .sum()
         .reset_index()
     )
     pivot_df = grouped.pivot(
         index='ANOMES',
-        columns='categoria_macro',
+        columns='CD_CATEGORY',
         values='VALUE'
     ).fillna(0)
     return pivot_df
 
 def prepare_macro_n2_data(df):
     """
-    Agrupa por ANOMES, categoria_macro e categoria_l2.
+    Agrupa por ANOMES, CD_CATEGORY e categoria_l2.
     Retorna pivot com multi-índice nas colunas.
     """
     grouped = (
-        df.groupby(['ANOMES', 'categoria_macro', 'categoria_l2'])['VALUE']
+        df.groupby(['ANOMES', 'CD_CATEGORY', 'CD_SUB_CATEGORY'])['VALUE']
         .sum()
         .reset_index()
     )
     pivot_df = grouped.pivot(
         index='ANOMES',
-        columns=['categoria_macro', 'categoria_l2'],
+        columns=['CD_CATEGORY', 'CD_SUB_CATEGORY'],
         values='VALUE'
     ).fillna(0)
     return pivot_df
 
 def macro_percentage(df):
     """
-    Calcula a participação percentual de cada categoria_macro por mês.
+    Calcula a participação percentual de cada CD_CATEGORY por mês.
     """
     pivot_df = prepare_macro_data(df)
     percent_df = pivot_df.div(pivot_df.sum(axis=1), axis=0) * 100
@@ -285,16 +285,16 @@ def grafico_sub_evolucao(df, macro_filter=None, top_n=None):
         titulo = "Evolução dos Gastos por Subcategoria"
     
     # Agrupa por ANOMES e categoria_l2
-    grouped = data.groupby(['ANOMES', 'categoria_l2'])['VALUE'].sum().reset_index()
+    grouped = data.groupby(['ANOMES', 'CD_SUB_CATEGORY'])['VALUE'].sum().reset_index()
     
     # Se top_n for especificado, calcula totais por subcategoria e filtra
     if top_n:
-        total_por_sub = grouped.groupby('categoria_l2')['VALUE'].sum().sort_values(ascending=False)
+        total_por_sub = grouped.groupby('CD_SUB_CATEGORY')['VALUE'].sum().sort_values(ascending=False)
         top_subcats = total_por_sub.head(top_n).index
-        grouped = grouped[grouped['categoria_l2'].isin(top_subcats)]
+        grouped = grouped[grouped['CD_SUB_CATEGORY'].isin(top_subcats)]
     
-    # Pivot: linhas = ANOMES, colunas = categoria_l2
-    pivot_df = grouped.pivot(index='ANOMES', columns='categoria_l2', values='VALUE').fillna(0)
+    # Pivot: linhas = ANOMES, colunas = CD_SUB_CATEGORY
+    pivot_df = grouped.pivot(index='ANOMES', columns='CD_SUB_CATEGORY', values='VALUE').fillna(0)
     
     # Ordenar cronologicamente
     pivot_df.index = pd.to_datetime(pivot_df.index, format='%m%Y')
