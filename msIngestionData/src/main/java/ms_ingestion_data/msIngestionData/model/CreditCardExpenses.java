@@ -73,7 +73,7 @@ public class CreditCardExpenses {
     }
 
 
-    public Map<String, BigDecimal> calcularTotalPorCartao(List<CardExpense> expenses) {
+    public Map<String, BigDecimal> totalAmountByCard(List<CardExpense> expenses) {
 
         return expenses.stream()
                 .collect(Collectors.groupingBy(
