@@ -5,7 +5,7 @@
 name: 'personal_finance'
 version: '1.0.0'
 
-# This setting configures which "profile" dbt uses for this project.
+# This setting configures which "profile" dbt uses for this project. 
 profile: 'personal_finance'
 
 # These configurations specify where dbt should look for different types of files.
