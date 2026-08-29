@@ -1,0 +1,11 @@
+version: 2
+
+sources:
+  - name: finance
+    description: "Dados financeiros brutos provenientes do processo de ingestão."
+
+    schema: main
+
+    tables:
+      - name: raw_expenses
+        description: "Dados brutos de despesas carregados pelo processo de ingestão."
