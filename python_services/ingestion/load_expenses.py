@@ -1,77 +1,27 @@
 from pathlib import Path
-import csv
-import sqlite3
+import duckdb
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 print(f"Base directory: {BASE_DIR}")
 
 CSV_PATH = BASE_DIR / "data" / "expenses.csv"
-DATABASE_PATH = BASE_DIR / "warehouse" / "personal_finance.db"
+DATABASE_PATH = BASE_DIR / "warehouse" / "personal_finance.duckdb"
 
 print(f"CSV path: {CSV_PATH}")
 print(f"Database path: {DATABASE_PATH}")
 
-
 def load_expenses():
+    print("Loading expenses from CSV to DuckDB...")
+    DATABASE_PATH.parent.mkdir(parents=True, exist_ok=True)
 
-    print("Loading expenses from CSV to SQLite...")
+    conn = duckdb.connect(str(DATABASE_PATH))
 
-    DATABASE_PATH.parent.mkdir(
-        parents=True,
-        exist_ok=True
-    )
-
-    conn = sqlite3.connect(DATABASE_PATH)
-
-    cursor = conn.cursor()
-
-    with open(
-        CSV_PATH,
-        mode="r",
-        encoding="mac_roman",
-        newline=""
-    ) as file:
-
-        reader = csv.reader(
-            file,
-            delimiter=";"
-        )
-
-        rows = list(reader)
-
-    # Primeira linha contém os nomes das colunas
-    headers = rows[0]
-
-    # Cria nomes de colunas seguros para SQLite
-    columns = [
-        f'"{column.strip()}" TEXT'
-        for column in headers
-    ]
-
-    cursor.execute("DROP TABLE IF EXISTS raw_expenses")
-
-    cursor.execute(
-        f"""
-        CREATE TABLE raw_expenses (
-            {", ".join(columns)}
-        )
-        """
-    )
-
-    placeholders = ", ".join(
-        ["?" for _ in headers]
-    )
-
-    cursor.executemany(
-        f"""
-        INSERT INTO raw_expenses
-        VALUES ({placeholders})
-        """,
-        rows[1:]
-    )
-
-    conn.commit()
+    conn.execute(f"""
+        CREATE OR REPLACE TABLE raw_expenses AS
+        SELECT *
+        FROM read_csv('{CSV_PATH}', delim=';', encoding='mac_roman', header=True)
+    """)
 
     conn.close()
 
