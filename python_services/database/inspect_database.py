@@ -1,7 +1,7 @@
 from pathlib import Path
 import duckdb
 
-
+# python -c "import duckdb; conn=duckdb.connect('warehouse/personal_finance.duckdb'); print(conn.sql('SELECT * FROM int_expenses_unpivoted LIMIT 120')); conn.close()"
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 DATABASE_PATH = BASE_DIR / "warehouse" / "personal_finance.duckdb"
@@ -10,6 +10,7 @@ DATABASE_PATH = BASE_DIR / "warehouse" / "personal_finance.duckdb"
 def inspect_database():
 
     conn = duckdb.connect(str(DATABASE_PATH))
+    # conn.execute("DROP VIEW IF EXISTS sql_expenses")
 
     print("\n=== TABLES AND VIEWS ===")
 
@@ -50,3 +51,6 @@ def inspect_database():
 
 if __name__ == "__main__":
     inspect_database()
+
+# python -c "import duckdb; conn=duckdb.connect('warehouse/personal_finance.duckdb'); print(conn.sql('SELECT * FROM int_expenses_unpivoted WHERE amount IS NOT NULL')); conn.close()"
+# python -c "import duckdb; conn=duckdb.connect('warehouse/personal_finance.duckdb'); print(conn.sql('SELECT COUNT(*) AS total, COUNT(amount) AS preenchidos, COUNT(*) - COUNT(amount) AS nulos FROM int_expenses_unpivoted')); conn.close()"
