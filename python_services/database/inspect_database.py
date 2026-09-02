@@ -3,9 +3,7 @@ import duckdb
 
 # python -c "import duckdb; conn=duckdb.connect('warehouse/personal_finance.duckdb'); print(conn.sql('SELECT * FROM int_expenses_unpivoted LIMIT 120')); conn.close()"
 BASE_DIR = Path(__file__).resolve().parents[2]
-
 DATABASE_PATH = BASE_DIR / "warehouse" / "personal_finance.duckdb"
-
 
 def inspect_database():
 
@@ -43,6 +41,16 @@ def inspect_database():
             SELECT *
             FROM stg_expenses
             LIMIT 5
+        """)
+    )
+
+
+    print("\n=== INTERMEDIATE LAYER ===")
+    print(
+        conn.sql("""
+            SELECT *
+            FROM int_expenses_unpivoted
+            LIMIT 25
         """)
     )
 
