@@ -1,0 +1,27 @@
+version: 2
+
+models:
+
+  - name: dim_category
+    description: "Dimensão contendo as categorias de despesas."
+
+    columns:
+      - name: category
+        description: "Categoria da despesa."
+        data_tests:
+          - not_null
+          - unique
+
+  - name: fct_expenses
+    description: "Tabela fato contendo valores de despesas por categoria e mês."
+
+    columns:
+      - name: category
+        description: "Categoria da despesa."
+        data_tests:
+          - not_null
+
+      - name: month
+        description: "Mês de referência da despesa."
+        data_tests:
+          - not_null
