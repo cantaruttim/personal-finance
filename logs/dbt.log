@@ -14,3 +14,51 @@ Runtime Error
 [0m19:54:36.756884 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10c795ba0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10c703650>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10c7fc160>]}
 [0m19:54:36.757096 [debug] [MainThread]: Flushing usage events
 [0m19:54:37.904906 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m18:18:48.852546 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10919da90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10a5df4d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10a5df890>]}
+
+
+============================== 18:18:48.855915 | 4112f014-5a16-49f9-ac15-a9278e9e13d3 ==============================
+[0m18:18:48.855915 [info ] [MainThread]: Running with dbt=1.12.3
+[0m18:18:48.856253 [debug] [MainThread]: running dbt with arguments {'write_json': 'True', 'debug': 'False', 'introspect': 'True', 'target_path': 'None', 'empty': 'None', 'maximum_seed_size_mib': '1', 'static_parser': 'True', 'hints_enabled': 'True', 'quiet': 'False', 'use_colors': 'True', 'send_anonymous_usage_stats': 'True', 'version_check': 'True', 'invocation_command': 'dbt test', 'profiles_dir': '/Users/cantaruttim/.dbt', 'no_print': 'None', 'printer_width': '80', 'indirect_selection': 'eager', 'cache_selected_only': 'False', 'fail_fast': 'False', 'log_path': 'logs', 'use_experimental_parser': 'False', 'log_cache_events': 'False', 'partial_parse': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'warn_error': 'None', 'log_format': 'default'}
+[0m18:18:48.856640 [error] [MainThread]: [[31mERROR[0m]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /Users/cantaruttim/Desktop/Personal/Projects/personal-finance/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m18:18:48.858743 [debug] [MainThread]: Resource report: {"command_name": "test", "command_success": false, "command_wall_clock_time": 0.065192625, "process_in_blocks": "0", "process_kernel_time": 0.149078, "process_mem_max_rss": "123043840", "process_out_blocks": "0", "process_user_time": 0.763905}
+[0m18:18:48.859056 [debug] [MainThread]: Command `dbt test` failed at 18:18:48.859003 after 0.07 seconds
+[0m18:18:48.859246 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10a629ba0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10a593650>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10a6b0160>]}
+[0m18:18:48.859416 [debug] [MainThread]: Flushing usage events
+[0m18:18:49.636285 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m22:53:28.700231 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10abeda90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10c02f4d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10c02f890>]}
+
+
+============================== 22:53:28.703825 | 8495d6a1-1e17-4fea-abb7-1f76b0657ddb ==============================
+[0m22:53:28.703825 [info ] [MainThread]: Running with dbt=1.12.3
+[0m22:53:28.704182 [debug] [MainThread]: running dbt with arguments {'introspect': 'True', 'cache_selected_only': 'False', 'use_experimental_parser': 'False', 'debug': 'False', 'warn_error': 'None', 'log_path': 'logs', 'invocation_command': 'dbt test', 'maximum_seed_size_mib': '1', 'use_colors': 'True', 'write_json': 'True', 'profiles_dir': '/Users/cantaruttim/.dbt', 'log_format': 'default', 'no_print': 'None', 'indirect_selection': 'eager', 'partial_parse': 'True', 'quiet': 'False', 'version_check': 'True', 'static_parser': 'True', 'fail_fast': 'False', 'log_cache_events': 'False', 'target_path': 'None', 'hints_enabled': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'empty': 'None', 'send_anonymous_usage_stats': 'True', 'printer_width': '80'}
+[0m22:53:28.704562 [error] [MainThread]: [[31mERROR[0m]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /Users/cantaruttim/Desktop/Personal/Projects/personal-finance/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m22:53:28.712162 [debug] [MainThread]: Resource report: {"command_name": "test", "command_success": false, "command_wall_clock_time": 0.06526629, "process_in_blocks": "0", "process_kernel_time": 0.178017, "process_mem_max_rss": "121946112", "process_out_blocks": "0", "process_user_time": 0.801896}
+[0m22:53:28.712718 [debug] [MainThread]: Command `dbt test` failed at 22:53:28.712613 after 0.07 seconds
+[0m22:53:28.712989 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10c079ba0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10bfe7650>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10c100160>]}
+[0m22:53:28.713203 [debug] [MainThread]: Flushing usage events
+[0m22:53:29.497803 [debug] [MainThread]: An error was encountered while trying to flush usage events
+[0m23:31:11.544557 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10d0a1a90>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e4e34d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e4e3890>]}
+
+
+============================== 23:31:11.547874 | 6a49639d-06ce-4599-bafa-37dd7cce59be ==============================
+[0m23:31:11.547874 [info ] [MainThread]: Running with dbt=1.12.3
+[0m23:31:11.548217 [debug] [MainThread]: running dbt with arguments {'introspect': 'True', 'partial_parse': 'True', 'send_anonymous_usage_stats': 'True', 'cache_selected_only': 'False', 'indirect_selection': 'eager', 'quiet': 'False', 'use_colors': 'True', 'debug': 'False', 'invocation_command': 'dbt test', 'maximum_seed_size_mib': '1', 'warn_error': 'None', 'fail_fast': 'False', 'static_parser': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'target_path': 'None', 'printer_width': '80', 'version_check': 'True', 'log_format': 'default', 'hints_enabled': 'True', 'no_print': 'None', 'log_cache_events': 'False', 'use_experimental_parser': 'False', 'log_path': 'logs', 'empty': 'None', 'profiles_dir': '/Users/cantaruttim/.dbt', 'write_json': 'True'}
+[0m23:31:11.548598 [error] [MainThread]: [[31mERROR[0m]: Encountered an error:
+Runtime Error
+  No dbt_project.yml found at expected path /Users/cantaruttim/Desktop/Personal/Projects/personal-finance/dbt_project.yml
+  Verify that each entry within packages.yml (and their transitive dependencies) contains a file named dbt_project.yml
+  
+[0m23:31:11.550717 [debug] [MainThread]: Resource report: {"command_name": "test", "command_success": false, "command_wall_clock_time": 0.059390042, "process_in_blocks": "0", "process_kernel_time": 0.141369, "process_mem_max_rss": "123191296", "process_out_blocks": "0", "process_user_time": 0.808522}
+[0m23:31:11.551057 [debug] [MainThread]: Command `dbt test` failed at 23:31:11.551004 after 0.06 seconds
+[0m23:31:11.551251 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e52dba0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e497650>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x10e5b4160>]}
+[0m23:31:11.551434 [debug] [MainThread]: Flushing usage events
+[0m23:31:12.351762 [debug] [MainThread]: An error was encountered while trying to flush usage events

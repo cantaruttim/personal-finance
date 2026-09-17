@@ -1,0 +1,14 @@
+version: 2
+
+models:
+
+  - name: stg_expenses
+    description: "Camada de staging dos dados financeiros brutos."
+
+    columns:
+
+      - name: Categories
+        description: "Categoria original da despesa."
+
+        data_tests:
+          - not_null

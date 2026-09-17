@@ -1,0 +1,27 @@
+version: 2
+
+models:
+
+  - name: int_expenses_unpivoted
+    description: >
+      Modelo intermediário que transforma os dados financeiros
+      do formato wide para o formato long, criando um registro
+      por categoria e mês.
+
+    columns:
+
+      - name: category
+        description: "Categoria da despesa."
+        data_tests:
+          - not_null
+
+      - name: month
+        description: "Mês de referência da despesa."
+        data_tests:
+          - not_null
+
+      - name: amount
+        description: >
+          Valor da despesa para a categoria e mês.
+          Valores não informados na origem são representados como NULL.
+          
